@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react'
-import { Camera, Download, Heart, Home, Layers, LogOut, Search, TrendingUp, User, type LucideIcon } from 'lucide-react'
+import { Camera, Download, Heart, Sparkles, Home, Layers, LogOut, Search, TrendingUp, User, type LucideIcon } from 'lucide-react'
 import type { PokemonCard } from '../../types/pokemon'
 import { Scanner } from '../scanner/Scanner'
 import { CardDetail } from '../pokemon/CardDetail'
@@ -10,6 +10,7 @@ import { useAuth } from '../../store/auth'
 import { useProfile } from '../../store/profile'
 import { Avatar } from '../profile/Avatar'
 import { useInstallPrompt } from '../../hooks/useInstallPrompt'
+import { useUpdates } from '../../store/updates'
 
 const NAV: { page: Page; label: string; icon: LucideIcon }[] = [
   { page: 'inicio', label: 'Início', icon: Home },
@@ -84,6 +85,7 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
   const avatarUrl = useProfile((s) => s.avatarUrl)
   const scanning = useUi((s) => s.scanning)
   const { available: installable, install } = useInstallPrompt()
+  const unseenUpdate = useUpdates((s) => s.unseen)
   const setScanning = useUi((s) => s.setScanning)
   const [scanned, setScanned] = useState<PokemonCard | null>(null)
   const wishes = useWishlist((s) => s.items)
@@ -147,6 +149,15 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
             </div>
             <HeaderSearch />
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => go('novidades')}
+                aria-label={unseenUpdate ? 'Novidades (há atualização nova)' : 'Novidades'}
+                title="Novidades"
+                className="relative grid h-9 w-9 place-items-center rounded-full text-muted hover:bg-raised hover:text-ink"
+              >
+                <Sparkles size={18} aria-hidden />
+                {unseenUpdate && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" aria-hidden />}
+              </button>
               <button
                 onClick={() => setScanning(true)}
                 aria-label="Escanear carta com a câmera"

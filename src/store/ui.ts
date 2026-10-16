@@ -1,8 +1,8 @@
 import { create } from 'zustand'
 
-export type Page = 'inicio' | 'colecao' | 'valor' | 'desejos' | 'perfil' | 'busca'
+export type Page = 'inicio' | 'colecao' | 'valor' | 'desejos' | 'perfil' | 'busca' | 'novidades'
 
-const PAGES: Page[] = ['inicio', 'colecao', 'valor', 'desejos', 'perfil', 'busca']
+const PAGES: Page[] = ['inicio', 'colecao', 'valor', 'desejos', 'perfil', 'busca', 'novidades']
 
 export const SET_KEY = 'pokeflex:set'
 

@@ -43,6 +43,15 @@ src/
 - Variáveis em `.env.local` (veja `.env.example`). Sem elas o app roda em modo demonstração (login e coleção no navegador).
 - Mudanças no banco: novo arquivo em `supabase/migrations/` e rodar no SQL Editor do projeto.
 
+## Novidades (obrigatório a cada commit com mudança visível)
+
+A tela "Novidades" (`src/pages/Updates.tsx`) é atualizada junto com cada commit que muda algo que o usuário vê:
+
+- Adicione uma nova versão no **topo** de `RELEASES` em `src/data/updates.ts` (versão incrementada, data do dia, título e uma frase de resumo).
+- Cada item: título curto, explicação amigável, uma **Dica** ensinando um detalhe que passa despercebido e, quando fizer sentido, uma ação (`page` ou `scan`).
+- Print da tela em `public/updates/<nome>.webp`: 1280x800, tirado no modo demonstração (sem dados reais), WebP qualidade ~74.
+- Correções invisíveis (refatoração, testes) não entram.
+
 ## Armadilhas
 
 - Depois de mudar `tailwind.config.js` ou `.env.local`, reinicie o `npm run dev`; o Vite não recarrega sozinho aqui.

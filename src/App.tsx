@@ -14,6 +14,7 @@ import { Wishlist } from './pages/Wishlist'
 import { Profile } from './pages/Profile'
 import { Login } from './pages/Login'
 import { Search } from './pages/Search'
+import { Updates } from './pages/Updates'
 
 const PAGES = {
   inicio: Dashboard,
@@ -22,6 +23,7 @@ const PAGES = {
   desejos: Wishlist,
   perfil: Profile,
   busca: Search,
+  novidades: Updates,
 }
 
 const BOOT_MS = 3500
