@@ -5,6 +5,9 @@ import type { CardCategory, PokemonCard, PokemonType } from '../types/pokemon'
 import { CATEGORY_LABEL, compareRarity, rarityLabel, TYPE_INFO } from '../utils/pokemon'
 import { useSetCards, useSets } from '../hooks/useTcgdex'
 import { Chip } from '../components/ui/Chip'
+import { SetCompletion } from '../components/collection/SetCompletion'
+import { SET_KEY } from '../store/ui'
+import { isMainSetCard } from '../utils/sets'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { CardTile } from '../components/pokemon/CardTile'
 import { CardShowcase } from '../components/pokemon/CardShowcase'
@@ -14,7 +17,6 @@ import { SetPicker } from '../components/collection/SetPicker'
 type Ownership = 'todas' | 'tenho' | 'faltando'
 type Kind = PokemonType | Exclude<CardCategory, 'pokemon'>
 
-const SET_KEY = 'pokeflex:set'
 const DEFAULT_SET = 'base1'
 
 const readSet = () => {
@@ -27,13 +29,13 @@ const readSet = () => {
 
 const kindOf = (c: PokemonCard): Kind | undefined => (c.category === 'pokemon' ? c.type : c.category)
 
-const kindInfo = (k: Kind) =>
-  k === 'trainer' || k === 'energy' ? { label: CATEGORY_LABEL[k], color: undefined } : TYPE_INFO[k]
+const kindInfo = (k: Kind) => (k === 'trainer' || k === 'energy' ? { label: CATEGORY_LABEL[k], color: undefined } : TYPE_INFO[k])
 
 export function Collection() {
   const [setId, setSetId] = useState(readSet)
   const { quantities: OWNED } = useOwned()
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [completionOpen, setCompletionOpen] = useState(false)
   const sets = useSets()
   const { data, error, loading, retry } = useSetCards(setId)
 
@@ -85,8 +87,10 @@ export function Collection() {
   }, [allCards, query, ownership, kind, rarity, OWNED])
 
   const ownedCards = useMemo(() => cards.filter((c) => OWNED[c.id]), [cards, OWNED])
-  const uniqueOwned = useMemo(() => allCards.filter((c) => OWNED[c.id]).length, [allCards, OWNED])
-  const setSize = set?.official ?? allCards.length
+  const mainCards = useMemo(() => allCards.filter(isMainSetCard), [allCards])
+  const uniqueOwned = useMemo(() => mainCards.filter((c) => OWNED[c.id]).length, [mainCards, OWNED])
+  const missing = useMemo(() => mainCards.filter((c) => !OWNED[c.id]), [mainCards, OWNED])
+  const setSize = set?.official ?? mainCards.length
 
   const clear = () => {
     setQuery('')
@@ -124,6 +128,11 @@ export function Collection() {
             </span>
           </div>
           <ProgressBar value={uniqueOwned} max={setSize || 1} tone="success" label="Progresso do set" />
+          {missing.length > 0 && (
+            <button onClick={() => setCompletionOpen(true)} className="mt-2 text-sm text-primary hover:underline">
+              Quanto falta pra completar?
+            </button>
+          )}
         </div>
       </header>
 
@@ -262,6 +271,14 @@ export function Collection() {
         </div>
       )}
 
+      <SetCompletion
+        open={completionOpen}
+        set={set}
+        missing={missing}
+        ownedCount={uniqueOwned}
+        onClose={() => setCompletionOpen(false)}
+        onOpenCard={setSelected}
+      />
       <CardDetail card={selected} onClose={() => setSelected(null)} />
       <SetPicker
         open={pickerOpen}

@@ -1,8 +1,10 @@
 import { create } from 'zustand'
 
-export type Page = 'inicio' | 'colecao' | 'trocas' | 'perfil' | 'busca'
+export type Page = 'inicio' | 'colecao' | 'valor' | 'desejos' | 'perfil' | 'busca'
 
-const PAGES: Page[] = ['inicio', 'colecao', 'trocas', 'perfil', 'busca']
+const PAGES: Page[] = ['inicio', 'colecao', 'valor', 'desejos', 'perfil', 'busca']
+
+export const SET_KEY = 'pokeflex:set'
 
 const fromHash = (): { page: Page; query: string } => {
   const [path, search = ''] = window.location.hash.replace(/^#\/?/, '').split('?')
@@ -15,9 +17,10 @@ type UiState = {
   query: string
   go: (page: Page) => void
   search: (query: string, replace?: boolean) => void
+  openSet: (setId: string) => void
 }
 
-export const useUi = create<UiState>((set) => ({
+export const useUi = create<UiState>((set, get) => ({
   ...fromHash(),
   go: (page) => {
     window.location.hash = `/${page}`
@@ -29,6 +32,14 @@ export const useUi = create<UiState>((set) => ({
     if (replace) history.replaceState(null, '', hash)
     else window.location.hash = hash
     set({ page: 'busca', query })
+  },
+  openSet: (setId) => {
+    try {
+      localStorage.setItem(SET_KEY, setId)
+    } catch {
+      // Sem armazenamento: a Coleção abre no set padrão.
+    }
+    get().go('colecao')
   },
 }))
 

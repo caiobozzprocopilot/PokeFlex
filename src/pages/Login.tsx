@@ -2,7 +2,6 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEve
 import { Check, Eye, EyeOff, FastForward, Power, Volume2, VolumeX } from 'lucide-react'
 import { useAuth, type AuthUser } from '../store/auth'
 import { isDemo } from '../lib/supabase'
-import { STATS } from '../data/mock'
 import { useOwned } from '../store/collection'
 
 // Medidas do vídeo (1280×720). No quadro FREEZE_AT a moldura de login desenhada pelo vídeo
@@ -312,9 +311,9 @@ function Recognized({ user, granted, onSwitch }: RecognizedProps) {
 
       <dl className="mt-5 grid grid-cols-3 gap-2">
         {[
-          ['Nível', STATS.level],
           ['Cartas', owned.total],
-          ['Sequência', `${STATS.streak} dias`],
+          ['Únicas', owned.unique],
+          ['Coleções', new Set(owned.entries.map((e) => e.card.setId)).size],
         ].map(([k, v]) => (
           <div key={k} className="rounded-md border border-hud/25 bg-hud/10 px-3 py-2">
             <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-hud-ink/55">{k}</dt>

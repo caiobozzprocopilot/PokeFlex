@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AppShell } from './components/layout/AppShell'
+import { ValueRecorder } from './components/layout/ValueRecorder'
 import { useUi } from './store/ui'
 import { useAuth } from './store/auth'
 import { useCollection } from './store/collection'
+import { useWishlist } from './store/wishlist'
 import { Dashboard } from './pages/Dashboard'
 import { Collection } from './pages/Collection'
-import { Trading } from './pages/Trading'
+import { Value } from './pages/Value'
+import { Wishlist } from './pages/Wishlist'
 import { Profile } from './pages/Profile'
 import { Login } from './pages/Login'
 import { Search } from './pages/Search'
@@ -13,7 +16,8 @@ import { Search } from './pages/Search'
 const PAGES = {
   inicio: Dashboard,
   colecao: Collection,
-  trocas: Trading,
+  valor: Value,
+  desejos: Wishlist,
   perfil: Profile,
   busca: Search,
 }
@@ -35,7 +39,9 @@ function App() {
   }, [user])
 
   useEffect(() => {
-    if (authReady) useCollection.getState().load(userId)
+    if (!authReady) return
+    useCollection.getState().load(userId)
+    useWishlist.getState().load(userId)
   }, [authReady, userId])
 
   useEffect(() => {
@@ -53,6 +59,7 @@ function App() {
   const Page = PAGES[page]
   return (
     <>
+      {user && <ValueRecorder userId={userId} />}
       {user && gate !== 'open' && (
         <AppShell boot={boot}>
           <Page key={page} />

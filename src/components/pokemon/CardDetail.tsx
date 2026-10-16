@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, Check, Plus, Repeat2, Trash2, X } from 'lucide-react'
+import { ArrowLeft, Check, Heart, Plus, Trash2, X } from 'lucide-react'
+import { useWishlist } from '../../store/wishlist'
 import type { CardVariant, PokemonCard } from '../../types/pokemon'
 import { cardLabel, rarityLabel, TYPE_INFO } from '../../utils/pokemon'
 import { defaultVariant, LANGUAGES, VARIANT_LABEL } from '../../utils/collection'
@@ -109,6 +110,9 @@ function OwnedList({ card }: { card: PokemonCard }) {
 export function CardDetail({ card, onClose }: CardDetailProps) {
   const ref = useRef<HTMLDialogElement>(null)
   const go = useUi((s) => s.go)
+  const wishes = useWishlist((s) => s.items)
+  const addWish = useWishlist((s) => s.add)
+  const removeWish = useWishlist((s) => s.remove)
   const entries = useCollection((s) => s.entries)
   const ownedQty = card ? entries.filter((e) => e.card.id === card.id).reduce((n, e) => n + e.quantity, 0) : 0
   const [view, setView] = useState<View>('info')
@@ -135,6 +139,7 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
   }, [flash])
 
   const type = card?.type ? TYPE_INFO[card.type] : undefined
+  const wish = card ? wishes.find((w) => w.card.id === card.id && w.variant === variant) : undefined
 
   return (
     <dialog
@@ -214,13 +219,24 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
                   </Button>
                   <Button
                     variant="secondary"
-                    onClick={() => {
-                      onClose()
-                      go('trocas')
-                    }}
+                    aria-pressed={!!wish}
+                    onClick={() => (wish ? removeWish(wish.id) : addWish(card, variant))}
+                    className={wish ? 'border-accent/50 text-accent' : ''}
                   >
-                    <Repeat2 size={16} aria-hidden /> {ownedQty > 1 ? 'Oferecer em troca' : 'Procurar troca'}
+                    <Heart size={16} fill={wish ? 'currentColor' : 'none'} aria-hidden />
+                    {wish ? `Nos desejos (${VARIANT_LABEL[variant].toLowerCase()})` : 'Quero esta'}
                   </Button>
+                  {wish && (
+                    <button
+                      onClick={() => {
+                        onClose()
+                        go('desejos')
+                      }}
+                      className="self-center text-sm text-muted hover:text-primary"
+                    >
+                      Definir preço-alvo
+                    </button>
+                  )}
                 </div>
               </div>
             ) : (

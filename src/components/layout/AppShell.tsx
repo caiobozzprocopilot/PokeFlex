@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react'
-import { Flame, Home, Layers, LogOut, Repeat2, Search, User, type LucideIcon } from 'lucide-react'
+import { Heart, Home, Layers, LogOut, Search, TrendingUp, User, type LucideIcon } from 'lucide-react'
 import { useUi, type Page } from '../../store/ui'
-import { STATS } from '../../data/mock'
+import { useWishlist } from '../../store/wishlist'
+import { useWishlistPricing } from '../../hooks/useWishlistPricing'
 import { useAuth } from '../../store/auth'
-import { ProgressBar } from '../ui/ProgressBar'
 
 const NAV: { page: Page; label: string; icon: LucideIcon }[] = [
   { page: 'inicio', label: 'Início', icon: Home },
   { page: 'colecao', label: 'Coleção', icon: Layers },
-  { page: 'trocas', label: 'Trocas', icon: Repeat2 },
+  { page: 'valor', label: 'Valor', icon: TrendingUp },
+  { page: 'desejos', label: 'Desejos', icon: Heart },
   { page: 'perfil', label: 'Perfil', icon: User },
 ]
 
@@ -22,18 +23,6 @@ function Logo() {
       <span className="font-display text-lg font-bold tracking-tight">
         Poke<span className="text-primary">Flex</span>
       </span>
-    </div>
-  )
-}
-
-function LevelPill() {
-  return (
-    <div className="flex items-center gap-3 rounded-xl border border-line bg-surface px-3 py-1.5">
-      <span className="font-mono text-xs text-muted">NV</span>
-      <span className="font-display text-sm font-bold text-primary">{STATS.level}</span>
-      <div className="hidden w-24 sm:block">
-        <ProgressBar value={STATS.xp} max={STATS.nextLevelXp} size="sm" label="XP para o próximo nível" />
-      </div>
     </div>
   )
 }
@@ -78,7 +67,9 @@ function HeaderSearch() {
         placeholder="Buscar carta em todas as coleções"
         className="h-10 w-full rounded-xl border border-line bg-surface pl-10 pr-10 text-sm placeholder:text-muted focus:border-primary focus:outline-none"
       />
-      <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded border border-line px-1.5 font-mono text-[11px] text-muted">/</kbd>
+      <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded border border-line px-1.5 font-mono text-[11px] text-muted">
+        /
+      </kbd>
     </form>
   )
 }
@@ -87,6 +78,15 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
   const { page, go } = useUi()
   const user = useAuth((s) => s.user)!
   const signOut = useAuth((s) => s.signOut)
+  const wishes = useWishlist((s) => s.items)
+  const alerts = useWishlistPricing(wishes).list.filter((w) => w.belowTarget).length
+  const badge = (p: Page) =>
+    p === 'desejos' && alerts > 0 ? (
+      <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-success px-1.5 font-mono text-[11px] font-semibold text-bg">
+        {alerts}
+        <span className="sr-only"> abaixo do alvo</span>
+      </span>
+    ) : null
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[240px_1fr]" data-boot={boot || undefined}>
@@ -110,20 +110,14 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
               >
                 <Icon size={18} className={active ? 'text-primary' : ''} aria-hidden />
                 {label}
+                {badge(p)}
               </button>
             )
           })}
         </nav>
-        <div className="mt-auto rounded-2xl border border-line bg-raised/50 p-4">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <Flame size={16} className="text-accent" aria-hidden />
-            {STATS.streak} dias seguidos
-          </div>
-          <p className="mt-1 text-xs text-muted">Volte amanhã para manter a sequência.</p>
-        </div>
         <button
           onClick={signOut}
-          className="mt-3 flex h-10 items-center gap-3 rounded-xl px-3 text-sm text-muted transition-colors hover:bg-raised/60 hover:text-ink"
+          className="mt-auto flex h-10 items-center gap-3 rounded-xl px-3 text-sm text-muted transition-colors hover:bg-raised/60 hover:text-ink"
         >
           <LogOut size={16} aria-hidden /> Sair
         </button>
@@ -144,7 +138,6 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
               >
                 <Search size={18} aria-hidden />
               </button>
-              <LevelPill />
               <button
                 onClick={() => go('perfil')}
                 aria-label="Abrir perfil"
@@ -163,7 +156,7 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
         aria-label="Principal"
         className="boot-up fixed inset-x-0 bottom-0 z-50 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
       >
-        <div className="grid grid-cols-4">
+        <div className="grid grid-cols-5">
           {NAV.map(({ page: p, label, icon: Icon }) => {
             const active = p === page
             return (
@@ -171,12 +164,18 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
                 key={p}
                 onClick={() => go(p)}
                 aria-current={active ? 'page' : undefined}
-                className={`flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium ${
+                className={`relative flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium ${
                   active ? 'text-primary' : 'text-muted'
                 }`}
               >
                 <Icon size={20} aria-hidden />
                 {label}
+                {p === 'desejos' && alerts > 0 && (
+                  <span
+                    className="absolute right-[22%] top-2.5 h-2 w-2 rounded-full bg-success"
+                    aria-label={`${alerts} abaixo do alvo`}
+                  />
+                )}
               </button>
             )
           })}

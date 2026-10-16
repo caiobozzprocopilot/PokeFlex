@@ -57,6 +57,8 @@ export type PriceQuote = {
   low?: number
   high?: number
   changePct?: number
+  avg7?: number
+  avg30?: number
   updated?: string
 }
 
@@ -101,6 +103,8 @@ function cardmarketQuote(cm: CardmarketPrices, card: PokemonCard, variant: CardV
     value,
     low: shiny ? num(cm['low-holo']) : num(cm.low),
     changePct: avg7 && avg30 ? ((avg7 - avg30) / avg30) * 100 : undefined,
+    avg7,
+    avg30,
     updated: cm.updated,
   }
 }
