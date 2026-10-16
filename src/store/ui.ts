@@ -9,7 +9,7 @@ export const SET_KEY = 'pokeflex:set'
 const fromHash = (): { page: Page; query: string } => {
   const [path, search = ''] = window.location.hash.replace(/^#\/?/, '').split('?')
   const page = PAGES.includes(path as Page) ? (path as Page) : 'inicio'
-  return { page, query: page === 'busca' ? new URLSearchParams(search).get('q') ?? '' : '' }
+  return { page, query: page === 'busca' ? (new URLSearchParams(search).get('q') ?? '') : '' }
 }
 
 type UiState = {
@@ -18,10 +18,14 @@ type UiState = {
   go: (page: Page) => void
   search: (query: string, replace?: boolean) => void
   openSet: (setId: string) => void
+  scanning: boolean
+  setScanning: (open: boolean) => void
 }
 
 export const useUi = create<UiState>((set, get) => ({
   ...fromHash(),
+  scanning: false,
+  setScanning: (scanning) => set({ scanning }),
   go: (page) => {
     window.location.hash = `/${page}`
     set({ page })

@@ -163,6 +163,22 @@ export function fetchSetCards(setId: string): Promise<{ set: CardSet; cards: Pok
   })
 }
 
+// Várias cartas por id numa única consulta, na ordem pedida (ids desconhecidos são ignorados).
+export async function fetchCards(ids: string[]): Promise<PokemonCard[]> {
+  if (!ids.length) return []
+  const [sets, data] = await Promise.all([
+    fetchSets(),
+    gql<Record<string, (ApiCard & { set: { id: string } | null }) | null>>(
+      `{ ${ids.map((id, i) => `c${i}: card(id: ${JSON.stringify(id)}) { ${CARD_FIELDS} set { id } }`).join(' ')} }`,
+    ),
+  ])
+  const byId = new Map(sets.map((s) => [s.id, s]))
+  return ids
+    .map((_, i) => data[`c${i}`])
+    .filter((c): c is ApiCard & { set: { id: string } } => !!c?.set && byId.has(c.set.id))
+    .map((c) => toCard(c, byId.get(c.set.id)!))
+}
+
 const SEARCH_TTL = 24 * 60 * 60 * 1000
 const SEARCH_PAGE = 100
 export const SEARCH_LIMIT = 600

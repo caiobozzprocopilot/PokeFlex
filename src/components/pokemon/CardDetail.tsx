@@ -16,6 +16,7 @@ import { AddToCollection } from '../collection/AddToCollection'
 interface CardDetailProps {
   card: PokemonCard | null
   onClose: () => void
+  initialView?: View
 }
 
 type View = 'info' | 'add'
@@ -107,7 +108,7 @@ function OwnedList({ card }: { card: PokemonCard }) {
   )
 }
 
-export function CardDetail({ card, onClose }: CardDetailProps) {
+export function CardDetail({ card, onClose, initialView = 'info' }: CardDetailProps) {
   const ref = useRef<HTMLDialogElement>(null)
   const go = useUi((s) => s.go)
   const wishes = useWishlist((s) => s.items)
@@ -126,7 +127,7 @@ export function CardDetail({ card, onClose }: CardDetailProps) {
     if (card && !dialog.open) dialog.showModal()
     if (!card && dialog.open) dialog.close()
     if (card) {
-      setView('info')
+      setView(initialView)
       setVariant(defaultVariant(card))
       setFlash(null)
     }

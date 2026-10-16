@@ -7,5 +7,6 @@ dist-ssr
 !.env.example
 .vercel
 .claude/
+scripts/.cache
 .DS_Store
 *.log

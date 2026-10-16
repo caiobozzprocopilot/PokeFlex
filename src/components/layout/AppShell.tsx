@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react'
-import { Heart, Home, Layers, LogOut, Search, TrendingUp, User, type LucideIcon } from 'lucide-react'
+import { Camera, Download, Heart, Home, Layers, LogOut, Search, TrendingUp, User, type LucideIcon } from 'lucide-react'
+import type { PokemonCard } from '../../types/pokemon'
+import { Scanner } from '../scanner/Scanner'
+import { CardDetail } from '../pokemon/CardDetail'
 import { useUi, type Page } from '../../store/ui'
 import { useWishlist } from '../../store/wishlist'
 import { useWishlistPricing } from '../../hooks/useWishlistPricing'
 import { useAuth } from '../../store/auth'
 import { useProfile } from '../../store/profile'
 import { Avatar } from '../profile/Avatar'
+import { useInstallPrompt } from '../../hooks/useInstallPrompt'
 
 const NAV: { page: Page; label: string; icon: LucideIcon }[] = [
   { page: 'inicio', label: 'Início', icon: Home },
@@ -18,10 +22,7 @@ const NAV: { page: Page; label: string; icon: LucideIcon }[] = [
 function Logo() {
   return (
     <div className="flex items-center gap-2.5">
-      <span className="relative grid h-8 w-8 place-items-center rounded-lg bg-primary">
-        <span className="absolute inset-x-0 top-1/2 h-[2px] -translate-y-1/2 bg-bg" />
-        <span className="relative h-3 w-3 rounded-full border-2 border-bg bg-primary" />
-      </span>
+      <img src="/favicon.svg" alt="" className="h-8 w-8" />
       <span className="font-display text-lg font-bold tracking-tight">
         Poke<span className="text-primary">Flex</span>
       </span>
@@ -81,6 +82,10 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
   const user = useAuth((s) => s.user)!
   const signOut = useAuth((s) => s.signOut)
   const avatarUrl = useProfile((s) => s.avatarUrl)
+  const scanning = useUi((s) => s.scanning)
+  const { available: installable, install } = useInstallPrompt()
+  const setScanning = useUi((s) => s.setScanning)
+  const [scanned, setScanned] = useState<PokemonCard | null>(null)
   const wishes = useWishlist((s) => s.items)
   const alerts = useWishlistPricing(wishes).list.filter((w) => w.belowTarget).length
   const badge = (p: Page) =>
@@ -118,9 +123,17 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
             )
           })}
         </nav>
+        {installable && (
+          <button
+            onClick={install}
+            className="mt-auto flex h-10 items-center gap-3 rounded-xl border border-primary/40 px-3 text-sm text-primary transition-colors hover:bg-primary/10"
+          >
+            <Download size={16} aria-hidden /> Instalar app
+          </button>
+        )}
         <button
           onClick={signOut}
-          className="mt-auto flex h-10 items-center gap-3 rounded-xl px-3 text-sm text-muted transition-colors hover:bg-raised/60 hover:text-ink"
+          className={`${installable ? 'mt-2' : 'mt-auto'} flex h-10 items-center gap-3 rounded-xl px-3 text-sm text-muted transition-colors hover:bg-raised/60 hover:text-ink`}
         >
           <LogOut size={16} aria-hidden /> Sair
         </button>
@@ -134,6 +147,14 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
             </div>
             <HeaderSearch />
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setScanning(true)}
+                aria-label="Escanear carta com a câmera"
+                title="Escanear carta"
+                className="grid h-9 w-9 place-items-center rounded-full text-muted hover:bg-raised hover:text-ink"
+              >
+                <Camera size={18} aria-hidden />
+              </button>
               <button
                 onClick={() => go('busca')}
                 aria-label="Buscar carta"
@@ -180,6 +201,19 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
           })}
         </div>
       </nav>
+      <Scanner
+        open={scanning}
+        onClose={() => setScanning(false)}
+        onPick={(card) => {
+          setScanning(false)
+          setScanned(card)
+        }}
+        onSearch={() => {
+          setScanning(false)
+          go('busca')
+        }}
+      />
+      <CardDetail card={scanned} initialView="add" onClose={() => setScanned(null)} />
     </div>
   )
 }

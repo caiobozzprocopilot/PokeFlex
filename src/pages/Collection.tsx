@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronDown, CloudOff, LayoutGrid, Rotate3d, Search, SearchX } from 'lucide-react'
+import { Camera, ChevronDown, CloudOff, LayoutGrid, Rotate3d, Search, SearchX } from 'lucide-react'
 import { useOwned } from '../store/collection'
 import type { CardCategory, PokemonCard, PokemonType } from '../types/pokemon'
 import { CATEGORY_LABEL, compareRarity, rarityLabel, TYPE_INFO } from '../utils/pokemon'
 import { useSetCards, useSets } from '../hooks/useTcgdex'
 import { Chip } from '../components/ui/Chip'
 import { SetCompletion } from '../components/collection/SetCompletion'
-import { SET_KEY } from '../store/ui'
+import { SET_KEY, useUi } from '../store/ui'
 import { isMainSetCard } from '../utils/sets'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { CardTile } from '../components/pokemon/CardTile'
@@ -36,6 +36,7 @@ export function Collection() {
   const { quantities: OWNED } = useOwned()
   const [pickerOpen, setPickerOpen] = useState(false)
   const [completionOpen, setCompletionOpen] = useState(false)
+  const setScanning = useUi((s) => s.setScanning)
   const sets = useSets()
   const { data, error, loading, retry } = useSetCards(setId)
 
@@ -128,11 +129,19 @@ export function Collection() {
             </span>
           </div>
           <ProgressBar value={uniqueOwned} max={setSize || 1} tone="success" label="Progresso do set" />
-          {missing.length > 0 && (
-            <button onClick={() => setCompletionOpen(true)} className="mt-2 text-sm text-primary hover:underline">
-              Quanto falta pra completar?
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+            {missing.length > 0 && (
+              <button onClick={() => setCompletionOpen(true)} className="text-sm text-primary hover:underline">
+                Quanto falta pra completar?
+              </button>
+            )}
+            <button
+              onClick={() => setScanning(true)}
+              className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary"
+            >
+              <Camera size={15} aria-hidden /> Escanear carta
             </button>
-          )}
+          </div>
         </div>
       </header>
 

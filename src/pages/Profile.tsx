@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
-import { Award, Layers, Library, LogOut, Pencil, Plus, Star, Wallet } from 'lucide-react'
+import { Award, Download, Layers, Library, LogOut, Pencil, Plus, Star, Wallet } from 'lucide-react'
 import type { PokemonCard } from '../types/pokemon'
 import { useOwned } from '../store/collection'
 import { useAuth } from '../store/auth'
 import { useProfile } from '../store/profile'
 import { useShowcases, type Showcase } from '../store/showcases'
+import { useInstallPrompt } from '../hooks/useInstallPrompt'
 import { useCollectionPricing } from '../hooks/useCollectionValue'
 import { formatBRL } from '../services/pricing'
 import { computeBadges } from '../utils/achievements'
@@ -29,6 +30,7 @@ export function Profile() {
   const pricing = useCollectionPricing(owned.entries)
   const showcases = useShowcases((s) => s.items)
   const feature = useShowcases((s) => s.feature)
+  const { available: installable, install } = useInstallPrompt()
 
   const [editingProfile, setEditingProfile] = useState(false)
   const [editor, setEditor] = useState<{ open: boolean; showcase: Showcase | null }>({ open: false, showcase: null })
@@ -84,7 +86,12 @@ export function Profile() {
             <h1 className="text-3xl font-bold">{user.name}</h1>
             <p className="text-muted">{user.email}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap justify-center gap-2">
+            {installable && (
+              <Button size="sm" onClick={install}>
+                <Download size={15} aria-hidden /> Instalar app
+              </Button>
+            )}
             <Button variant="secondary" size="sm" onClick={() => setEditingProfile(true)}>
               <Pencil size={15} aria-hidden /> Editar perfil
             </Button>

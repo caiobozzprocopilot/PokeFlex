@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+    
+    <g transform="translate(32 32) scale(0.30079999999999996)">
+  <defs>
+    <radialGradient id="shine" cx="-35" cy="-45" r="70" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="red" x1="0" y1="-100" x2="0" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF5A3C"/>
+      <stop offset="1" stop-color="#D2290B"/>
+    </linearGradient>
+    <linearGradient id="white" x1="0" y1="0" x2="0" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#D9DCE3"/>
+    </linearGradient>
+  </defs>
+  <circle r="100" fill="#111"/>
+  <path d="M -92 0 A 92 92 0 0 1 92 0 Z" fill="url(#red)"/>
+  <path d="M -92 0 A 92 92 0 0 0 92 0 Z" fill="url(#white)"/>
+  <rect x="-96" y="-9" width="192" height="18" fill="#111"/>
+  <circle r="34" fill="#111"/>
+  <circle r="24" fill="#F4F5F8"/>
+  <circle r="13" fill="none" stroke="#C9CDD6" stroke-width="3"/>
+  <ellipse cx="-40" cy="-52" rx="34" ry="20" fill="url(#shine)" transform="rotate(-28 -40 -52)"/>
+</g>
+  </svg>

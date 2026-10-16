@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",
+    "@techstark/opencv-js": "^5.0.0-release.1",
     "axios": "^1.6.8",
     "framer-motion": "^10.16.19",
     "lucide-react": "^1.57.0",
@@ -23,8 +24,10 @@
     "@vitejs/plugin-react": "^4.3.0",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.32",
+    "sharp": "^0.35.5",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3",
-    "vite": "^5.0.10"
+    "vite": "^5.0.10",
+    "vite-plugin-pwa": "^2.0.0"
   }
 }
