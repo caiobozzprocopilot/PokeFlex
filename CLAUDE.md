@@ -6,7 +6,7 @@ Sempre responder em português.
 
 ## Permissões
 
-As permissões de comandos ficam em `.claude/settings.json` (não aqui). Todos os comandos Bash e PowerShell estão liberados sem confirmação, exceto apagar pastas recursivamente e `git push --force`.
+As permissões ficam em `.claude/settings.json` (não aqui; este arquivo não libera nada). Estão liberados sem confirmação: comandos Bash e PowerShell, ler, editar e criar arquivos, busca e consulta à web. Continuam bloqueados: apagar pastas recursivamente e `git push --force`.
 
 ## Referência Rápida
 

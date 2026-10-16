@@ -2,6 +2,8 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEve
 import { Check, Eye, EyeOff, FastForward, Power, Volume2, VolumeX } from 'lucide-react'
 import { useAuth, type AuthUser } from '../store/auth'
 import { isDemo } from '../lib/supabase'
+import { useProfile } from '../store/profile'
+import { Avatar } from '../components/profile/Avatar'
 import { useOwned } from '../store/collection'
 
 // Medidas do vídeo (1280×720). No quadro FREEZE_AT a moldura de login desenhada pelo vídeo
@@ -268,6 +270,7 @@ interface RecognizedProps {
 function Recognized({ user, granted, onSwitch }: RecognizedProps) {
   const owned = useOwned()
   const [scan, setScan] = useState(false)
+  const avatarUrl = useProfile((s) => s.avatarUrl)
   useEffect(() => {
     const raf = requestAnimationFrame(() => setScan(true))
     return () => cancelAnimationFrame(raf)
@@ -285,8 +288,8 @@ function Recognized({ user, granted, onSwitch }: RecognizedProps) {
       </div>
 
       <div className="mt-6 flex items-center gap-4">
-        <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-gradient-to-br from-accent to-primary font-display text-2xl font-bold text-bg shadow-[0_0_24px_-4px_rgb(var(--hud)/0.6)]">
-          {user.name[0]?.toUpperCase()}
+        <span className="rounded-full shadow-[0_0_24px_-4px_rgb(var(--hud)/0.6)]">
+          <Avatar name={user.name} url={avatarUrl} className="h-16 w-16" textClassName="text-2xl" />
         </span>
         <div className="min-w-0">
           <p className="truncate font-display text-2xl font-bold">{user.name}</p>

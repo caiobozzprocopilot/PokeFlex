@@ -5,6 +5,8 @@ import { useUi } from './store/ui'
 import { useAuth } from './store/auth'
 import { useCollection } from './store/collection'
 import { useWishlist } from './store/wishlist'
+import { useProfile } from './store/profile'
+import { useShowcases } from './store/showcases'
 import { Dashboard } from './pages/Dashboard'
 import { Collection } from './pages/Collection'
 import { Value } from './pages/Value'
@@ -42,6 +44,8 @@ function App() {
     if (!authReady) return
     useCollection.getState().load(userId)
     useWishlist.getState().load(userId)
+    useProfile.getState().load(userId)
+    useShowcases.getState().load(userId)
   }, [authReady, userId])
 
   useEffect(() => {

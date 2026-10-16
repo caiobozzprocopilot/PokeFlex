@@ -4,6 +4,8 @@ import { useUi, type Page } from '../../store/ui'
 import { useWishlist } from '../../store/wishlist'
 import { useWishlistPricing } from '../../hooks/useWishlistPricing'
 import { useAuth } from '../../store/auth'
+import { useProfile } from '../../store/profile'
+import { Avatar } from '../profile/Avatar'
 
 const NAV: { page: Page; label: string; icon: LucideIcon }[] = [
   { page: 'inicio', label: 'Início', icon: Home },
@@ -78,6 +80,7 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
   const { page, go } = useUi()
   const user = useAuth((s) => s.user)!
   const signOut = useAuth((s) => s.signOut)
+  const avatarUrl = useProfile((s) => s.avatarUrl)
   const wishes = useWishlist((s) => s.items)
   const alerts = useWishlistPricing(wishes).list.filter((w) => w.belowTarget).length
   const badge = (p: Page) =>
@@ -138,12 +141,8 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
               >
                 <Search size={18} aria-hidden />
               </button>
-              <button
-                onClick={() => go('perfil')}
-                aria-label="Abrir perfil"
-                className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-accent to-primary font-display text-sm font-bold text-bg"
-              >
-                {user.name[0]?.toUpperCase()}
+              <button onClick={() => go('perfil')} aria-label="Abrir perfil" className="rounded-full">
+                <Avatar name={user.name} url={avatarUrl} />
               </button>
             </div>
           </div>

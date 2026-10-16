@@ -13,6 +13,7 @@ type AuthState = {
   signIn: (email: string, password: string) => Promise<void>
   signUp: (name: string, email: string, password: string) => Promise<SignUpResult>
   signOut: () => Promise<void>
+  rename: (name: string) => Promise<void>
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -44,7 +45,8 @@ const translate = (message: string) => MESSAGES.find(([re]) => re.test(message))
 
 const toUser = (u: User): AuthUser => {
   const email = u.email ?? ''
-  const name = typeof u.user_metadata?.name === 'string' && u.user_metadata.name.trim() ? u.user_metadata.name.trim() : nameFromEmail(email)
+  const name =
+    typeof u.user_metadata?.name === 'string' && u.user_metadata.name.trim() ? u.user_metadata.name.trim() : nameFromEmail(email)
   return { id: u.id, name, email }
 }
 
@@ -67,6 +69,7 @@ function createDemoAuth() {
           return 'signed-in'
         },
         signOut: async () => set({ user: null }),
+        rename: async (name) => set((s) => (s.user ? { user: { ...s.user, name } } : s)),
       }),
       { name: 'pokeflex-auth', partialize: (s) => ({ user: s.user }) },
     ),
@@ -97,6 +100,11 @@ function createSupabaseAuth() {
     },
     signOut: async () => {
       await client.auth.signOut()
+    },
+    rename: async (name) => {
+      const { data, error } = await client.auth.updateUser({ data: { name } })
+      if (error) throw new Error(translate(error.message))
+      if (data.user) apply(data.user)
     },
   }))
 

@@ -5,6 +5,8 @@ import { CardShowcase } from '../components/pokemon/CardShowcase'
 import { CardDetail } from '../components/pokemon/CardDetail'
 import { useOwned } from '../store/collection'
 import { useWishlist } from '../store/wishlist'
+import { useShowcases } from '../store/showcases'
+import { TopCardSpotlight } from '../components/pokemon/TopCardSpotlight'
 import { useCollectionPricing } from '../hooks/useCollectionValue'
 import { useWishlistPricing } from '../hooks/useWishlistPricing'
 import { formatBRL } from '../services/pricing'
@@ -31,7 +33,14 @@ export function Dashboard() {
   const pricing = useCollectionPricing(owned.entries)
   const wishes = useWishlist((s) => s.items)
   const wishPricing = useWishlistPricing(wishes)
-  const showcase = owned.cards
+  const featured = useShowcases((s) => s.items.find((x) => x.featured))
+  const featuredCards = useMemo(() => {
+    if (!featured) return []
+    const byId = new Map(owned.cards.map((c) => [c.id, c]))
+    return featured.cardIds.map((id) => byId.get(id)).filter((c): c is PokemonCard => !!c)
+  }, [featured, owned.cards])
+  const useFeatured = featuredCards.length >= 3
+  const showcase = useFeatured ? featuredCards : owned.cards
   const recent = owned.cards.slice(0, 4)
   const sets = useMemo(() => setsInProgress(owned.entries), [owned.entries])
   const badges = useMemo(
@@ -49,7 +58,10 @@ export function Dashboard() {
         style={bootAt(3)}
         className="boot panel relative grid animate-rise overflow-hidden lg:grid-cols-[minmax(340px,450px)_1fr] lg:items-center"
       >
-        <div aria-hidden className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl"
+        />
         <div className="relative p-6 pb-0 sm:p-8 sm:pb-0 lg:pb-8">
           <p className="label">Sua coleção</p>
           <h1 className="mt-2 text-3xl font-bold leading-tight sm:text-4xl">
@@ -97,10 +109,19 @@ export function Dashboard() {
           {showcase.length >= 3 ? (
             <>
               <p className="absolute left-0 right-0 top-4 z-10 flex items-center justify-center gap-1.5 text-xs text-muted lg:top-6">
-                <Sparkles size={12} className="text-primary" aria-hidden /> Sua vitrine · arraste para girar
+                <Sparkles size={12} className="text-primary" aria-hidden />
+                {useFeatured ? featured!.name : 'Sua coleção'} · arraste para girar ·
+                <button
+                  onClick={() => go('perfil')}
+                  className="pointer-events-auto underline-offset-2 hover:text-primary hover:underline"
+                >
+                  {useFeatured ? 'editar' : 'criar vitrine'}
+                </button>
               </p>
               <CardShowcase
+                key={useFeatured ? `${featured!.id}-${featured!.style}` : 'todas'}
                 cards={showcase}
+                preset={useFeatured ? featured!.style : 'cylinder'}
                 fadeColor={SURFACE}
                 cardWidth={180}
                 onOpen={setSelected}
@@ -136,7 +157,12 @@ export function Dashboard() {
           />
         </div>
         <div className="boot" style={bootAt(6)}>
-          <StatTile icon={Library} label="Coleções" value={sets.length} hint={sets.length ? 'com cartas suas' : 'nenhuma ainda'} />
+          <StatTile
+            icon={Library}
+            label="Coleções"
+            value={sets.length}
+            hint={sets.length ? 'com cartas suas' : 'nenhuma ainda'}
+          />
         </div>
         <div className="boot" style={bootAt(7)}>
           <StatTile
@@ -149,8 +175,14 @@ export function Dashboard() {
         </div>
       </section>
 
+      {!empty && (
+        <div className="boot" style={bootAt(8)}>
+          <TopCardSpotlight pricing={pricing} onOpen={setSelected} />
+        </div>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-        <section className="boot" style={bootAt(8)}>
+        <section className="boot" style={bootAt(9)}>
           <div className="mb-4 flex items-end justify-between">
             <h2 className="text-lg font-semibold">Adicionadas recentemente</h2>
             {!empty && (
@@ -172,7 +204,7 @@ export function Dashboard() {
           )}
         </section>
 
-        <section className="boot panel p-5" style={bootAt(9)}>
+        <section className="boot panel p-5" style={bootAt(10)}>
           <h2 className="mb-4 text-lg font-semibold">Seus sets</h2>
           {sets.length ? (
             <ul className="space-y-4">
@@ -198,7 +230,7 @@ export function Dashboard() {
         </section>
       </div>
 
-      <section className="boot panel p-5" style={bootAt(10)}>
+      <section className="boot panel p-5" style={bootAt(11)}>
         <div className="mb-5 flex items-end justify-between">
           <h2 className="text-lg font-semibold">Conquistas</h2>
           <button onClick={() => go('perfil')} className="text-sm text-muted hover:text-primary">
