@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { AppShell } from './components/layout/AppShell'
 import { ValueRecorder } from './components/layout/ValueRecorder'
 import { useUi } from './store/ui'
@@ -37,10 +37,18 @@ function App() {
   const userId = user?.id ?? null
   const [gate, setGate] = useState<Gate>('open')
   const [boot, setBoot] = useState(false)
+  const restored = useRef(false)
 
   useEffect(() => {
     if (!user) setGate('open')
   }, [user])
+
+  // Sessão já salva ao abrir o app: entra direto no Início, sem a intro da Pokédex.
+  useEffect(() => {
+    if (!authReady || restored.current) return
+    restored.current = true
+    if (useAuth.getState().user) setGate('closed')
+  }, [authReady])
 
   useEffect(() => {
     if (!authReady) return

@@ -62,15 +62,32 @@ export type PriceQuote = {
   updated?: string
 }
 
+// Preço só vem carta a carta; grades grandes pedem dezenas de uma vez, então limitamos as consultas simultâneas.
+const MAX_PARALLEL = 6
+let running = 0
+const waiting: (() => void)[] = []
+
+async function limited<T>(task: () => Promise<T>): Promise<T> {
+  if (running >= MAX_PARALLEL) await new Promise<void>((resolve) => waiting.push(resolve))
+  running++
+  try {
+    return await task()
+  } finally {
+    running--
+    waiting.shift()?.()
+  }
+}
+
 export function fetchPricing(cardId: string): Promise<CardPricing | null> {
   return cached(
     `price:${cardId}`,
-    async () => {
-      const res = await fetch(`https://api.tcgdex.net/v2/en/cards/${encodeURIComponent(cardId)}`)
-      if (!res.ok) throw new Error(`A tcgDex respondeu com erro ${res.status}.`)
-      const json = (await res.json()) as { pricing?: CardPricing | null }
-      return { pricing: json.pricing ?? null }
-    },
+    () =>
+      limited(async () => {
+        const res = await fetch(`https://api.tcgdex.net/v2/en/cards/${encodeURIComponent(cardId)}`)
+        if (!res.ok) throw new Error(`A tcgDex respondeu com erro ${res.status}.`)
+        const json = (await res.json()) as { pricing?: CardPricing | null }
+        return { pricing: json.pricing ?? null }
+      }),
     PRICE_TTL,
   ).then((r) => r.pricing)
 }

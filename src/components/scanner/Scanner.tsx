@@ -135,9 +135,10 @@ export function Scanner({ open, onClose, onPick, onSearch }: ScannerProps) {
       ref={ref}
       onClose={close}
       aria-label="Escanear carta"
+      data-fullscreen
       className="m-0 h-full max-h-none w-full max-w-none bg-black p-0 text-white backdrop:bg-black"
     >
-      <div className="flex h-full flex-col">
+      <div className="flex h-full flex-col pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
         <header className="flex items-center justify-between px-4 py-3">
           <h2 className="font-display text-lg font-bold">Escanear carta</h2>
           <button

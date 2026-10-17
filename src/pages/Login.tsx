@@ -620,7 +620,7 @@ export function Login({ onReveal, onDone }: LoginProps) {
           </button>
           <button
             onClick={() => start(false)}
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full px-4 py-2 text-sm text-white/55 hover:text-white"
+            className="absolute bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 rounded-full px-4 py-2 text-sm text-white/55 hover:text-white"
           >
             Entrar sem som
           </button>
@@ -628,7 +628,7 @@ export function Login({ onReveal, onDone }: LoginProps) {
       )}
 
       {phase === 'intro' && (
-        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 p-4 sm:p-6">
+        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-6">
           <button
             onClick={toggleSound}
             aria-label={muted ? 'Ativar som' : 'Desativar som'}

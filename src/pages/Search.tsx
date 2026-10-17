@@ -9,6 +9,8 @@ import { rarityLabel } from '../utils/pokemon'
 import { Chip } from '../components/ui/Chip'
 import { CardTile } from '../components/pokemon/CardTile'
 import { CardDetail } from '../components/pokemon/CardDetail'
+import { applyPrice, PriceFilter, type PriceSort } from '../components/collection/PriceFilter'
+import { useCardPrices } from '../hooks/useCardPrices'
 
 const POPULAR = ['Charizard', 'Pikachu', 'Mewtwo', 'Umbreon', 'Eevee', 'Gengar', 'Lugia', 'Rayquaza', 'Gardevoir', 'Snorlax']
 const MIN_CHARS = 2
@@ -23,6 +25,8 @@ export function Search() {
   const [onlyOwned, setOnlyOwned] = useState(false)
   const [oldestFirst, setOldestFirst] = useState(false)
   const [allNames, setAllNames] = useState(false)
+  const [priceRange, setPriceRange] = useState<string | null>(null)
+  const [priceSort, setPriceSort] = useState<PriceSort>(null)
   const [selected, setSelected] = useState<PokemonCard | null>(null)
 
   useEffect(() => setDraft(query), [query])
@@ -44,6 +48,9 @@ export function Search() {
   const ready = term.length >= MIN_CHARS
   const results = useResource(ready ? `search:${term.toLowerCase()}` : null, () => searchCards(term))
   const all = useMemo(() => results.data ?? [], [results.data])
+  // Com uma versão escolhida, só consulta o preço dela, não da busca inteira.
+  const priceTargets = useMemo(() => (name ? all.filter((c) => c.name === name) : all), [all, name])
+  const priced = useCardPrices(priceTargets, priceRange !== null || priceSort !== null)
 
   const names = useMemo(() => {
     const count = new Map<string, number>()
@@ -55,8 +62,8 @@ export function Search() {
 
   const cards = useMemo(() => {
     const list = all.filter((c) => (!name || c.name === name) && (!onlyOwned || quantities[c.id]))
-    return oldestFirst ? [...list].reverse() : list
-  }, [all, name, onlyOwned, oldestFirst, quantities])
+    return applyPrice(oldestFirst ? [...list].reverse() : list, priced.prices, priceRange, priceSort)
+  }, [all, name, onlyOwned, oldestFirst, quantities, priced.prices, priceRange, priceSort])
 
   const ownedHere = useMemo(() => all.filter((c) => quantities[c.id]).length, [all, quantities])
 
@@ -164,6 +171,15 @@ export function Search() {
             </div>
           )}
 
+          <PriceFilter
+            range={priceRange}
+            sort={priceSort}
+            onRange={setPriceRange}
+            onSort={setPriceSort}
+            loaded={priced.loaded}
+            total={priced.total}
+          />
+
           {cards.length > 0 ? (
             <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
               {cards.map((c) => (
@@ -181,7 +197,9 @@ export function Search() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted">Nenhuma carta com esses filtros.</p>
+            <p className="text-sm text-muted">
+              {priced.loading ? 'Procurando cartas nessa faixa de preço…' : 'Nenhuma carta com esses filtros.'}
+            </p>
           )}
         </>
       )}

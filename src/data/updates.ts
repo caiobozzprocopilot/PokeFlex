@@ -23,6 +23,33 @@ export type Release = {
 
 export const RELEASES: Release[] = [
   {
+    version: '0.6',
+    date: '2026-10-16',
+    title: 'Preços à vista e melhor no celular',
+    intro: 'O preço de mercado aparece embaixo de cada carta, dá para filtrar por preço e o app ficou mais confortável no celular.',
+    items: [
+      {
+        title: 'Preço embaixo de cada carta',
+        body: 'Na Coleção, na Busca e no Início, cada carta mostra o preço de mercado em reais logo abaixo do nome, sem precisar abrir.',
+        image: '/updates/preco-cartas.webp',
+        tip: 'É o preço de referência Near Mint da versão mais comum da carta. Abra a carta para ver o preço de cada variante e condição.',
+        action: { label: 'Ver na Coleção', page: 'colecao' },
+      },
+      {
+        title: 'Filtro e ordem por preço',
+        body: 'Escolha uma faixa (até R$ 10, R$ 10 a 50, R$ 50 a 200, acima de R$ 200) ou ordene das mais caras para as mais baratas, na Coleção e na Busca.',
+        image: '/updates/filtro-preco.webp',
+        tip: 'Combine com “Faltando” na Coleção e “Mais baratas” para achar as cartas mais fáceis de completar o set.',
+        action: { label: 'Filtrar a Coleção', page: 'colecao' },
+      },
+      {
+        title: 'Mais confortável no celular',
+        body: 'Quem já entrou vai direto para o Início, sem a intro. No iPhone, o topo não fica mais atrás da ilha, a página não escorrega para os lados e tocar na busca não dá mais zoom.',
+        tip: 'Quer ver a intro da Pokédex de novo? Saia da conta pelo Perfil e ela aparece no próximo login.',
+      },
+    ],
+  },
+  {
     version: '0.5',
     date: '2026-10-16',
     title: 'Tela de Novidades',

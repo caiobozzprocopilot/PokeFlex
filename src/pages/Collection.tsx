@@ -13,6 +13,8 @@ import { CardTile } from '../components/pokemon/CardTile'
 import { CardShowcase } from '../components/pokemon/CardShowcase'
 import { CardDetail } from '../components/pokemon/CardDetail'
 import { SetPicker } from '../components/collection/SetPicker'
+import { applyPrice, PriceFilter, type PriceSort } from '../components/collection/PriceFilter'
+import { useCardPrices } from '../hooks/useCardPrices'
 
 type Ownership = 'todas' | 'tenho' | 'faltando'
 type Kind = PokemonType | Exclude<CardCategory, 'pokemon'>
@@ -44,10 +46,13 @@ export function Collection() {
   const [ownership, setOwnership] = useState<Ownership>('todas')
   const [kind, setKind] = useState<Kind | null>(null)
   const [rarity, setRarity] = useState<string | null>(null)
+  const [priceRange, setPriceRange] = useState<string | null>(null)
+  const [priceSort, setPriceSort] = useState<PriceSort>(null)
   const [view, setView] = useState<'grade' | 'vitrine'>('grade')
   const [selected, setSelected] = useState<PokemonCard | null>(null)
 
   const allCards = useMemo(() => data?.cards ?? [], [data])
+  const priced = useCardPrices(allCards, priceRange !== null || priceSort !== null)
   const set = data?.set ?? sets.data?.find((s) => s.id === setId)
 
   useEffect(() => {
@@ -76,7 +81,7 @@ export function Collection() {
 
   const cards = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return allCards.filter((c) => {
+    const list = allCards.filter((c) => {
       const owned = !!OWNED[c.id]
       if (ownership === 'tenho' && !owned) return false
       if (ownership === 'faltando' && owned) return false
@@ -85,7 +90,8 @@ export function Collection() {
       if (q && !c.name.toLowerCase().includes(q) && !c.number.toLowerCase().startsWith(q)) return false
       return true
     })
-  }, [allCards, query, ownership, kind, rarity, OWNED])
+    return applyPrice(list, priced.prices, priceRange, priceSort)
+  }, [allCards, query, ownership, kind, rarity, OWNED, priced.prices, priceRange, priceSort])
 
   const ownedCards = useMemo(() => cards.filter((c) => OWNED[c.id]), [cards, OWNED])
   const mainCards = useMemo(() => allCards.filter(isMainSetCard), [allCards])
@@ -98,6 +104,8 @@ export function Collection() {
     setOwnership('todas')
     setKind(null)
     setRarity(null)
+    setPriceRange(null)
+    setPriceSort(null)
   }
 
   return (
@@ -191,6 +199,17 @@ export function Collection() {
             ))}
           </div>
         )}
+
+        {allCards.length > 0 && (
+          <PriceFilter
+            range={priceRange}
+            sort={priceSort}
+            onRange={setPriceRange}
+            onSort={setPriceSort}
+            loaded={priced.loaded}
+            total={priced.total}
+          />
+        )}
       </div>
 
       <div className="flex items-center justify-between gap-4">
@@ -272,8 +291,10 @@ export function Collection() {
       ) : (
         <div className="panel flex flex-col items-center px-6 py-16 text-center">
           <SearchX size={32} className="text-muted" aria-hidden />
-          <p className="mt-4 font-medium">Nenhuma carta com esses filtros</p>
-          <p className="mt-1 text-sm text-muted">Tente outro nome ou remova algum filtro.</p>
+          <p className="mt-4 font-medium">{priced.loading ? 'Procurando cartas nessa faixa de preço…' : 'Nenhuma carta com esses filtros'}</p>
+          <p className="mt-1 text-sm text-muted">
+            {priced.loading ? 'Elas aparecem aqui conforme os preços chegam.' : 'Tente outro nome ou remova algum filtro.'}
+          </p>
           <button onClick={clear} className="mt-5 text-sm text-primary hover:underline">
             Limpar filtros
           </button>

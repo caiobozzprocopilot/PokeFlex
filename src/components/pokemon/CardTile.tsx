@@ -2,6 +2,7 @@ import { useRef, useState, type PointerEvent } from 'react'
 import { Check, ImageOff, Lock } from 'lucide-react'
 import type { PokemonCard } from '../../types/pokemon'
 import { cardLabel, isHolo, rarityLabel, TYPE_INFO } from '../../utils/pokemon'
+import { CardPrice } from './CardPrice'
 
 interface CardTileProps {
   card: PokemonCard
@@ -11,9 +12,19 @@ interface CardTileProps {
   size?: 'sm' | 'md'
   mark?: boolean
   subtitle?: string
+  price?: boolean
 }
 
-export function CardTile({ card, quantity = 0, owned = true, showMeta = true, size = 'md', mark = false, subtitle }: CardTileProps) {
+export function CardTile({
+  card,
+  quantity = 0,
+  owned = true,
+  showMeta = true,
+  size = 'md',
+  mark = false,
+  subtitle,
+  price = true,
+}: CardTileProps) {
   const ref = useRef<HTMLDivElement>(null)
   const [loaded, setLoaded] = useState(false)
   const [failed, setFailed] = useState(!card.imageUrl)
@@ -103,6 +114,7 @@ export function CardTile({ card, quantity = 0, owned = true, showMeta = true, si
               <span className={holo ? 'text-primary' : ''}>{rarityLabel(card.rarity)}</span>
             </div>
           )}
+          {price && <CardPrice card={card} className="block pt-0.5" />}
         </figcaption>
       )}
     </figure>

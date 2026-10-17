@@ -142,8 +142,8 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
       </aside>
 
       <div className="flex min-w-0 flex-col">
-        <header className="boot-down sticky top-0 z-40 border-b border-line bg-bg/80 backdrop-blur-md">
-          <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+        <header className="boot-down sticky top-0 z-40 border-b border-line bg-bg/80 pt-[env(safe-area-inset-top)] backdrop-blur-md">
+          <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:px-6">
             <div className="lg:hidden">
               <Logo />
             </div>
