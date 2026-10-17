@@ -95,6 +95,8 @@ const DEFS: Def[] = [
 
 export const BADGE_COUNT = DEFS.length
 
+export const BADGES_BY_ID: Record<string, Def> = Object.fromEntries(DEFS.map((d) => [d.id, d]))
+
 const tierOf = (value: number, goals: number[]) => goals.filter((g) => value >= g).length as Tier
 
 // Insígnias calculadas a partir da coleção real; nada fica salvo à parte.

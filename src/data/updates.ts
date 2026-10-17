@@ -23,6 +23,34 @@ export type Release = {
 
 export const RELEASES: Release[] = [
   {
+    version: '0.8',
+    date: '2026-10-16',
+    title: 'Treinadores: perfil público e feed',
+    intro: 'Agora dá para mostrar sua coleção, seguir outros colecionadores e acompanhar o que eles capturam.',
+    items: [
+      {
+        title: 'Seu perfil público',
+        body: 'Escolha um @usuário no Perfil e ligue "Deixar meu perfil público". Seu link mostra nome, foto, bio, nível, insígnias, vitrine e cartas.',
+        image: '/updates/perfil-publico.webp',
+        tip: 'Ninguém vê seu e-mail, quanto você pagou nem sua lista de desejos. O valor total só aparece se você ligar "Mostrar o valor da coleção".',
+        action: { label: 'Configurar meu perfil', page: 'perfil' },
+      },
+      {
+        title: 'Siga treinadores e veja o feed',
+        body: 'Em Social, busque treinadores por nome ou @usuário e siga quem você curtir. O feed mostra as cartas capturadas, as insígnias conquistadas e quem subiu de nível.',
+        image: '/updates/social-feed.webp',
+        tip: 'Várias cartas capturadas pela mesma pessoa em poucas horas viram um item só no feed, com as cartas em leque.',
+        action: { label: 'Abrir Social', page: 'treinadores' },
+      },
+      {
+        title: 'Compartilhe o link',
+        body: 'Quem abrir o seu link vê o perfil na hora, mesmo sem conta no PokeFlex, e pode criar a própria coleção dali.',
+        image: '/updates/perfil-visitante.webp',
+        tip: 'No celular, "Compartilhar" abre o menu do sistema (WhatsApp, Instagram...). No computador, o link é copiado.',
+      },
+    ],
+  },
+  {
     version: '0.7',
     date: '2026-10-16',
     title: 'Insígnias e nível de treinador',

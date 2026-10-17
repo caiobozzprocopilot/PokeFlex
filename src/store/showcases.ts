@@ -73,7 +73,7 @@ export const useShowcases = create<ShowcasesState>()((set, get) => {
     load: async (userId) => {
       if (isDemo) return set({ items: readDemo() })
       if (!userId) return set({ items: [] })
-      const { data } = await supabase!.from('showcases').select(COLUMNS).order('created_at', { ascending: true })
+      const { data } = await supabase!.from('showcases').select(COLUMNS).eq('user_id', userId).order('created_at', { ascending: true })
       set({ items: ((data as Row[] | null) ?? []).map(fromRow) })
     },
 

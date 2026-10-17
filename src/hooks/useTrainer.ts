@@ -3,6 +3,7 @@ import { useCollection } from '../store/collection'
 import { useFx, type Celebration } from '../store/fx'
 import { computeBadges, trainerLevel, trainerXp, type Tier } from '../utils/achievements'
 import { useCollectionPricing } from './useCollectionValue'
+import { postAchievement } from '../services/social'
 
 // Insígnias, XP e nível do treinador calculados da coleção real.
 export function useTrainer() {
@@ -56,6 +57,15 @@ export function useAchievementWatcher(userId: string | null) {
     if (seen && level.level > seen.level) items.push({ kind: 'level', key: `level-${level.level}`, level: level.level, title: level.title })
     const changed = !seen || items.length > 0 || Object.keys(tiers).length !== Object.keys(seen.tiers).length
     if (changed) write(key, { tiers, level: Math.max(level.level, seen?.level ?? 0) })
-    if (items.length) celebrate(items)
+    if (items.length) {
+      celebrate(items)
+      for (const item of items) {
+        void postAchievement(
+          item.kind === 'badge'
+            ? { kind: 'badge', id: item.badge.id, name: item.badge.name, tier: item.tier }
+            : { kind: 'level', level: item.level, title: item.title },
+        ).catch(() => {})
+      }
+    }
   }, [userId, status, pricing.loading, badges, level, celebrate])
 }

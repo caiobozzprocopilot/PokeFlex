@@ -40,6 +40,7 @@ export const useValueHistory = create<HistoryState>()((set, get) => ({
     const { data, error } = await supabase!
       .from('collection_value_snapshots')
       .select('day, total_brl, cards')
+      .eq('user_id', userId)
       .order('day', { ascending: true })
       .limit(730)
     if (error) return set({ snapshots: [], loadedFor: userId })

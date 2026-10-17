@@ -76,7 +76,7 @@ export const useWishlist = create<WishlistState>()((set, get) => {
     load: async (userId) => {
       if (isDemo) return set({ items: readDemo(), error: null })
       if (!userId) return set({ items: [], error: null })
-      const { data, error } = await supabase!.from('wishlist_items').select(COLUMNS).order('added_at', { ascending: false })
+      const { data, error } = await supabase!.from('wishlist_items').select(COLUMNS).eq('user_id', userId).order('added_at', { ascending: false })
       if (error) return set({ error: 'Não foi possível carregar sua lista de desejos.' })
       set({ items: (data as Row[]).map(fromRow), error: null })
     },

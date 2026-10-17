@@ -4,7 +4,7 @@ import type { PokemonCard, PokemonType } from '../types/pokemon'
 
 const img = (id: number) => `https://assets.tcgdex.net/en/base/base1/${id}/high.webp`
 
-const card = (n: number, name: string, type: PokemonType, rarity: 'Rare' | 'Common', holo: boolean, hp: number): PokemonCard => ({
+export const card = (n: number, name: string, type: PokemonType, rarity: 'Rare' | 'Common', holo: boolean, hp: number): PokemonCard => ({
   id: `base1-${n}`,
   name,
   setId: 'base1',

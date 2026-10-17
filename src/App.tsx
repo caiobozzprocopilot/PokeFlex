@@ -15,6 +15,10 @@ import { Profile } from './pages/Profile'
 import { Login } from './pages/Login'
 import { Search } from './pages/Search'
 import { Updates } from './pages/Updates'
+import { Trainers } from './pages/Trainers'
+import { TrainerProfile } from './pages/TrainerProfile'
+import { PublicShell } from './components/layout/PublicShell'
+import { useSocial } from './store/social'
 
 const PAGES = {
   inicio: Dashboard,
@@ -24,6 +28,8 @@ const PAGES = {
   perfil: Profile,
   busca: Search,
   novidades: Updates,
+  treinadores: Trainers,
+  treinador: TrainerProfile,
 }
 
 const BOOT_MS = 3500
@@ -32,6 +38,7 @@ type Gate = 'open' | 'revealing' | 'closed'
 
 function App() {
   const page = useUi((s) => s.page)
+  const trainer = useUi((s) => s.trainer)
   const user = useAuth((s) => s.user)
   const authReady = useAuth((s) => s.ready)
   const userId = user?.id ?? null
@@ -56,6 +63,7 @@ function App() {
     useWishlist.getState().load(userId)
     useProfile.getState().load(userId)
     useShowcases.getState().load(userId)
+    useSocial.getState().load(userId)
   }, [authReady, userId])
 
   useEffect(() => {
@@ -71,15 +79,24 @@ function App() {
   const done = useCallback(() => setGate('closed'), [])
 
   const Page = PAGES[page]
+  // Link de perfil aberto por quem não tem conta: mostra o perfil direto, sem a intro de login.
+  const visiting = authReady && !user && page === 'treinador'
   return (
     <>
       {user && <ValueRecorder userId={userId} />}
       {user && gate !== 'open' && (
         <AppShell boot={boot}>
-          <Page key={page} />
+          <Page key={page === 'treinador' ? `t-${trainer}` : page} />
         </AppShell>
       )}
-      {gate !== 'closed' && (authReady ? <Login onReveal={reveal} onDone={done} /> : <div className="fixed inset-0 bg-black" />)}
+      {visiting && (
+        <PublicShell>
+          <TrainerProfile key={trainer} />
+        </PublicShell>
+      )}
+      {gate !== 'closed' &&
+        !visiting &&
+        (authReady ? <Login onReveal={reveal} onDone={done} /> : <div className="fixed inset-0 bg-black" />)}
     </>
   )
 }

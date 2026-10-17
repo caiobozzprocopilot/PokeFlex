@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react'
-import { Camera, Download, Heart, Sparkles, Home, Layers, LogOut, Search, TrendingUp, User, type LucideIcon } from 'lucide-react'
+import { Camera, Download, Heart, Sparkles, Home, Layers, LogOut, Search, TrendingUp, User, Users, type LucideIcon } from 'lucide-react'
 import type { PokemonCard } from '../../types/pokemon'
 import { Scanner } from '../scanner/Scanner'
 import { CardDetail } from '../pokemon/CardDetail'
@@ -19,10 +19,14 @@ const NAV: { page: Page; label: string; icon: LucideIcon }[] = [
   { page: 'colecao', label: 'Coleção', icon: Layers },
   { page: 'valor', label: 'Valor', icon: TrendingUp },
   { page: 'desejos', label: 'Desejos', icon: Heart },
+  { page: 'treinadores', label: 'Social', icon: Users },
   { page: 'perfil', label: 'Perfil', icon: User },
 ]
 
-function Logo() {
+// O perfil de outro treinador fica "dentro" de Social no menu.
+const navPage = (p: Page): Page => (p === 'treinador' ? 'treinadores' : p)
+
+export function Logo() {
   return (
     <div className="flex items-center gap-2.5">
       <img src="/favicon.svg" alt="" className="h-8 w-8" />
@@ -110,7 +114,7 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
         </div>
         <nav className="mt-10 flex flex-col gap-1" aria-label="Principal">
           {NAV.map(({ page: p, label, icon: Icon }, i) => {
-            const active = p === page
+            const active = p === navPage(page)
             return (
               <button
                 key={p}
@@ -190,9 +194,9 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
         aria-label="Principal"
         className="boot-up fixed inset-x-0 bottom-0 z-50 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
       >
-        <div className="grid grid-cols-5">
+        <div className="grid grid-cols-6">
           {NAV.map(({ page: p, label, icon: Icon }) => {
-            const active = p === page
+            const active = p === navPage(page)
             return (
               <button
                 key={p}
