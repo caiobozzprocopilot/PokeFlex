@@ -229,3 +229,5 @@ revoke all on function public.feed(timestamptz, int) from public;
 grant execute on function public.public_profile(text) to anon, authenticated;
 grant execute on function public.search_trainers(text) to anon, authenticated;
 grant execute on function public.feed(timestamptz, int) to authenticated;
+-- O Supabase dá acesso a anon por padrão em funções novas; o feed é só para quem está logado.
+revoke execute on function public.feed(timestamptz, int) from anon;
