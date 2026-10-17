@@ -1,5 +1,6 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { BellRing, Check, Heart, ListChecks, Search, Trash2, X } from 'lucide-react'
+import { BellRing, Check, Heart, ListChecks, Search, Store, Trash2, X } from 'lucide-react'
+import { ligaPokemonUrl } from '../utils/links'
 import type { PokemonCard } from '../types/pokemon'
 import { useWishlist, type WishItem } from '../store/wishlist'
 import { useUi } from '../store/ui'
@@ -109,6 +110,16 @@ function Row({ wish, onOpen, selecting, checked, onToggle }: RowProps) {
           <p className="font-mono text-sm tabular-nums">{price !== null ? formatBRL(price) : '—'}</p>
         </div>
         <TargetInput item={item} />
+        <a
+          href={ligaPokemonUrl(item.card)}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Ver ofertas de ${item.card.name} na LigaPokemon (abre em nova aba)`}
+          title="Ver ofertas na LigaPokemon"
+          className={`grid h-9 w-9 place-items-center rounded-lg text-muted hover:bg-raised hover:text-primary ${selecting ? 'invisible' : ''}`}
+        >
+          <Store size={16} aria-hidden />
+        </a>
         <button
           disabled={selecting}
           onClick={() => remove(item.id)}

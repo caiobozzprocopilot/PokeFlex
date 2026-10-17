@@ -23,6 +23,21 @@ export type Release = {
 
 export const RELEASES: Release[] = [
   {
+    version: '0.12',
+    date: '2026-10-17',
+    title: 'Ofertas na LigaPokemon',
+    intro: 'Achou a carta que queria? Agora dá para ver na hora quem vende ela no Brasil.',
+    items: [
+      {
+        title: 'Atalho para a LigaPokemon',
+        body: 'No detalhe de qualquer carta, logo abaixo do preço de mercado, "Ver ofertas na LigaPokemon" abre a página da mesma carta na Liga, com os preços das lojas brasileiras.',
+        image: '/updates/ligapokemon.webp',
+        tip: 'Na lista de desejos também tem o atalho (ícone de loja ao lado de cada carta): perfeito para comparar o preço-alvo com as ofertas reais.',
+        action: { label: 'Abrir desejos', page: 'desejos' },
+      },
+    ],
+  },
+  {
     version: '0.11',
     date: '2026-10-17',
     title: 'Fagulin, seu mascote de streak',

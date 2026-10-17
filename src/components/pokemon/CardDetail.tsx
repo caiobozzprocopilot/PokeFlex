@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, Check, Heart, Plus, Trash2, X } from 'lucide-react'
+import { ArrowLeft, Check, ExternalLink, Heart, Plus, Store, Trash2, X } from 'lucide-react'
+import { ligaPokemonUrl } from '../../utils/links'
 import { useWishlist } from '../../store/wishlist'
 import type { CardVariant, PokemonCard } from '../../types/pokemon'
 import { cardLabel, rarityLabel, TYPE_INFO } from '../../utils/pokemon'
@@ -206,6 +207,23 @@ export function CardDetail({ card, onClose, initialView = 'info' }: CardDetailPr
                 )}
 
                 <PriceBlock card={card} variant={variant} source={source} onVariant={setVariant} onSource={setSource} />
+
+                <a
+                  href={ligaPokemonUrl(card)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group -mt-3 flex items-center gap-3 rounded-2xl border border-line bg-raised/40 px-4 py-3 transition-colors hover:border-primary/40 hover:bg-raised"
+                >
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#E3350D]/15 text-[#FF6B4A]">
+                    <Store size={18} aria-hidden />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-medium">Ver ofertas na LigaPokemon</span>
+                    <span className="block text-xs text-muted">Preços de lojas brasileiras para esta carta</span>
+                  </span>
+                  <ExternalLink size={16} className="shrink-0 text-muted transition-colors group-hover:text-primary" aria-hidden />
+                  <span className="sr-only">(abre em nova aba)</span>
+                </a>
 
                 <section aria-labelledby="owned-title">
                   <h3 id="owned-title" className="label mb-3">
