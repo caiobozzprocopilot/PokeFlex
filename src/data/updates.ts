@@ -23,6 +23,26 @@ export type Release = {
 
 export const RELEASES: Release[] = [
   {
+    version: '0.9',
+    date: '2026-10-16',
+    title: 'Convite com QR code na Pokébola',
+    intro: 'Seu perfil virou um convite pronto para Stories, WhatsApp e onde mais você quiser.',
+    items: [
+      {
+        title: 'Convite de treinador',
+        body: 'Uma imagem no formato de Stories com sua foto, nível, números da coleção e uma Pokébola com o QR code no centro. Quem escanear cai direto no seu perfil, mesmo sem conta.',
+        image: '/updates/convite-qrcode.webp',
+        tip: 'As duas cartas atrás da Pokébola saem da sua vitrine principal. Monte uma vitrine com suas favoritas para escolher quem aparece no convite.',
+        action: { label: 'Criar meu convite', page: 'perfil' },
+      },
+      {
+        title: 'Compartilhe pelo celular',
+        body: 'No Android e no iPhone, "Compartilhar imagem" abre o menu do próprio celular: WhatsApp, Instagram, Telegram e o que você tiver instalado. Também dá para mandar só o link no WhatsApp, baixar a imagem ou copiar o link.',
+        tip: 'No Instagram, escolha Stories e adicione o adesivo de Link com o seu endereço: assim quem vê pode tocar, além de escanear.',
+      },
+    ],
+  },
+  {
     version: '0.8',
     date: '2026-10-16',
     title: 'Treinadores: perfil público e feed',

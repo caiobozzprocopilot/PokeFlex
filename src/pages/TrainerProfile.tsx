@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { BookOpen, CalendarDays, Check, CloudOff, Layers, Library, Lock, Pencil, Share2, UserX, Wallet } from 'lucide-react'
+import { BookOpen, CalendarDays, CloudOff, Layers, Library, Lock, Pencil, QrCode, UserX, Wallet } from 'lucide-react'
 import type { PokemonCard } from '../types/pokemon'
 import type { CollectionEntry } from '../store/collection'
 import { useAuth } from '../store/auth'
@@ -19,6 +19,8 @@ import { CardDetail } from '../components/pokemon/CardDetail'
 import { BadgeCase } from '../components/gamification/BadgeCase'
 import { PokeballDeco, XpBar } from '../components/gamification/TrainerCard'
 import { FollowButton } from '../components/social/SocialBits'
+import { InviteDialog } from '../components/social/InviteDialog'
+import { pickInviteCards, type InviteData } from '../utils/invite'
 
 const SURFACE = '#13131A'
 const NO_ENTRIES: CollectionEntry[] = []
@@ -85,7 +87,7 @@ function ProfileView({ profile: p }: { profile: NonNullable<Awaited<ReturnType<t
   const go = useUi((s) => s.go)
   const isMe = user?.id === p.id
   const [followers, setFollowers] = useState(p.followers)
-  const [shared, setShared] = useState(false)
+  const [inviting, setInviting] = useState(false)
   const [shown, setShown] = useState(PAGE_SIZE)
   const [selected, setSelected] = useState<PokemonCard | null>(null)
 
@@ -113,21 +115,25 @@ function ProfileView({ profile: p }: { profile: NonNullable<Awaited<ReturnType<t
   const byId = useMemo(() => new Map(cards.map((c) => [c.card.id, c.card])), [cards])
   const showcaseCards = featured ? featured.cardIds.map((id) => byId.get(id)).filter((c): c is PokemonCard => !!c) : []
 
-  const share = async () => {
-    const url = profileLink(p.username)
-    const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> }
-    try {
-      if (nav.share && matchMedia('(pointer: coarse)').matches) {
-        await nav.share({ title: `${p.name} no PokeFlex`, text: `Veja a coleção de ${p.name} no PokeFlex`, url })
-        return
-      }
-      await navigator.clipboard.writeText(url)
-      setShared(true)
-      window.setTimeout(() => setShared(false), 2200)
-    } catch {
-      // Compartilhamento cancelado: nada a fazer.
-    }
-  }
+  const invite = useMemo<InviteData>(
+    () => ({
+      url: profileLink(p.username),
+      name: p.name,
+      username: p.username,
+      avatarUrl: p.avatarUrl,
+      level: level.level,
+      title: level.title,
+      cards: total,
+      pokedex,
+      badges: badges.filter((b) => b.tier > 0).length,
+      cardImages: pickInviteCards(
+        cards.map((c) => c.card),
+        featured?.cardIds,
+      ),
+      own: isMe,
+    }),
+    [p, level, total, pokedex, badges, cards, featured, isMe],
+  )
 
   return (
     <div className="space-y-6">
@@ -166,8 +172,8 @@ function ProfileView({ profile: p }: { profile: NonNullable<Awaited<ReturnType<t
             ) : (
               <FollowButton targetId={p.id} following={p.isFollowing} onChange={(f) => setFollowers((n) => n + (f ? 1 : -1))} />
             )}
-            <Button variant="secondary" size="sm" className="h-10" onClick={share}>
-              {shared ? <Check size={15} aria-hidden /> : <Share2 size={15} aria-hidden />} {shared ? 'Link copiado' : 'Compartilhar'}
+            <Button variant="secondary" size="sm" className="h-10" onClick={() => setInviting(true)}>
+              <QrCode size={15} aria-hidden /> Compartilhar
             </Button>
           </div>
         </div>
@@ -239,6 +245,7 @@ function ProfileView({ profile: p }: { profile: NonNullable<Awaited<ReturnType<t
       </section>
 
       {user && <CardDetail card={selected} onClose={() => setSelected(null)} />}
+      <InviteDialog open={inviting} data={invite} onClose={() => setInviting(false)} />
     </div>
   )
 }

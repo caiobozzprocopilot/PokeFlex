@@ -1,5 +1,11 @@
-import { useEffect, useState, type FormEvent } from 'react'
-import { Check, Copy, Eye, Globe2, Lock } from 'lucide-react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { Check, Copy, Eye, Globe2, Lock, QrCode } from 'lucide-react'
+import { useProfile } from '../../store/profile'
+import { useOwned } from '../../store/collection'
+import { useShowcases } from '../../store/showcases'
+import { useTrainer } from '../../hooks/useTrainer'
+import { pickInviteCards, type InviteData } from '../../utils/invite'
+import { InviteDialog } from './InviteDialog'
 import { useAuth } from '../../store/auth'
 import { useSocial } from '../../store/social'
 import { useUi } from '../../store/ui'
@@ -93,6 +99,31 @@ export function PublicProfileSettings() {
 
   const live = settings.isPublic && settings.username
 
+  const [inviting, setInviting] = useState(false)
+  const avatarUrl = useProfile((s) => s.avatarUrl)
+  const owned = useOwned()
+  const featured = useShowcases((s) => s.items.find((x) => x.featured))
+  const { badges, level } = useTrainer()
+  const invite = useMemo<InviteData | null>(
+    () =>
+      settings.username
+        ? {
+            url: profileLink(settings.username),
+            name: user.name,
+            username: settings.username,
+            avatarUrl,
+            level: level.level,
+            title: level.title,
+            cards: owned.total,
+            pokedex: badges.find((b) => b.id === 'pokedex')?.value ?? 0,
+            badges: badges.filter((b) => b.tier > 0).length,
+            cardImages: pickInviteCards(owned.cards, featured?.cardIds),
+            own: true,
+          }
+        : null,
+    [settings.username, user.name, avatarUrl, level, owned, badges, featured],
+  )
+
   return (
     <section id="perfil-publico" className="panel scroll-mt-24 p-5 sm:p-6" aria-labelledby="public-title">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -171,6 +202,9 @@ export function PublicProfileSettings() {
           </Button>
           {live && (
             <>
+              <Button type="button" size="sm" onClick={() => setInviting(true)}>
+                <QrCode size={15} aria-hidden /> Convite com QR code
+              </Button>
               <Button type="button" variant="secondary" size="sm" onClick={() => openTrainer(settings.username!)}>
                 <Eye size={15} aria-hidden /> Ver como visitante
               </Button>
@@ -181,6 +215,7 @@ export function PublicProfileSettings() {
           )}
         </div>
       </form>
+      {live && <InviteDialog open={inviting} data={invite} onClose={() => setInviting(false)} />}
     </section>
   )
 }
