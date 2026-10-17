@@ -5,6 +5,8 @@ import { tierName } from '../../utils/achievements'
 import { setSound, sfx, soundOn } from '../../utils/sound'
 import { GymBadge, METAL } from './GymBadge'
 import { Pokeball } from './Pokeball'
+import { Fagulin } from '../mascot/Fagulin'
+import { stageOf } from '../../utils/mascot'
 
 const reduced = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -79,19 +81,28 @@ function useTypewriter(text: string, active: boolean, speed = 28) {
   return { shown: text.slice(0, n), done: n >= text.length, finish: () => setN(text.length) }
 }
 
-type Phase = 'drop' | 'shake' | 'open' | 'reveal'
+type Phase = 'drop' | 'shake' | 'open' | 'evolve' | 'reveal'
 
 function CelebrationOverlay({ item, onDone, remaining }: { item: Celebration; onDone: () => void; remaining: number }) {
-  const [phase, setPhase] = useState<Phase>(() => (reduced() ? 'reveal' : 'drop'))
+  const isMascot = item.kind === 'mascot'
+  const [phase, setPhase] = useState<Phase>(() => (reduced() ? 'reveal' : isMascot ? 'evolve' : 'drop'))
   const [sound, setSoundState] = useState(soundOn)
-  const isBadge = item.kind === 'badge'
-  const metal = isBadge ? METAL[item.tier as 1 | 2 | 3 | 4] : METAL[3]
-  const tint = isBadge ? item.badge.color : '#FFD60A'
+  const metal = item.kind === 'badge' ? METAL[item.tier as 1 | 2 | 3 | 4] : METAL[3]
+  const tint = item.kind === 'badge' ? item.badge.color : item.kind === 'mascot' ? '#FF7A1C' : '#FFD60A'
+  const fanfare = item.kind === 'level' ? sfx.level : sfx.badge
 
   useEffect(() => {
     if (reduced()) {
-      ;(isBadge ? sfx.badge : sfx.level)()
+      fanfare()
       return
+    }
+    if (isMascot) {
+      sfx.evolve()
+      const t = window.setTimeout(() => {
+        setPhase('reveal')
+        fanfare()
+      }, 2800)
+      return () => clearTimeout(t)
     }
     const timers = [
       window.setTimeout(() => setPhase('shake'), 600),
@@ -104,17 +115,31 @@ function CelebrationOverlay({ item, onDone, remaining }: { item: Celebration; on
       }, 2150),
       window.setTimeout(() => {
         setPhase('reveal')
-        ;(isBadge ? sfx.badge : sfx.level)()
+        fanfare()
       }, 2500),
     ]
     return () => timers.forEach(clearTimeout)
-  }, [isBadge])
+  }, [isMascot, fanfare])
 
-  const text = isBadge
-    ? item.tier === 1
-      ? `Parabéns! Você conquistou a insígnia ${item.badge.name}!`
-      : `Incrível! A insígnia ${item.badge.name} evoluiu para ${tierName(item.tier)}!`
-    : `Seu nível de treinador subiu para ${item.level}! Agora você é ${item.title}!`
+  const text =
+    item.kind === 'badge'
+      ? item.tier === 1
+        ? `Parabéns! Você conquistou a insígnia ${item.badge.name}!`
+        : `Incrível! A insígnia ${item.badge.name} evoluiu para ${tierName(item.tier)}!`
+      : item.kind === 'level'
+        ? `Seu nível de treinador subiu para ${item.level}! Agora você é ${item.title}!`
+        : `Parabéns! Seu Fagulin evoluiu para ${stageOf(item.stage).name}!`
+  const title = item.kind === 'badge' ? item.badge.name : item.kind === 'level' ? `Nível ${item.level}` : stageOf(item.stage).name
+  const label =
+    item.kind === 'badge' ? (item.tier === 1 ? 'Nova insígnia' : 'Insígnia evoluiu') : item.kind === 'level' ? 'Subiu de nível' : 'Evolução'
+  const visual =
+    item.kind === 'badge' ? (
+      <GymBadge shape={item.badge.shape} icon={item.badge.icon} color={item.badge.color} tier={item.tier} size={168} />
+    ) : item.kind === 'level' ? (
+      <LevelEmblem level={item.level} size={168} />
+    ) : (
+      <Fagulin stage={item.stage} size={240} />
+    )
   const typing = useTypewriter(text, phase === 'reveal')
 
   const advance = () => {
@@ -148,7 +173,7 @@ function CelebrationOverlay({ item, onDone, remaining }: { item: Celebration; on
     <dialog
       ref={ref}
       data-fullscreen
-      aria-label={isBadge ? `Insígnia ${item.badge.name} ${tierName(item.tier)}` : `Nível ${item.level}`}
+      aria-label={`${label}: ${title}`}
       onCancel={(e) => {
         e.preventDefault()
         advance()
@@ -178,7 +203,19 @@ function CelebrationOverlay({ item, onDone, remaining }: { item: Celebration; on
           </>
         )}
 
-        {phase !== 'reveal' && (
+        {item.kind === 'mascot' && phase === 'evolve' && (
+          <div className="relative grid place-items-center">
+            <div aria-hidden className="evo-glow absolute h-64 w-64 rounded-full bg-white/70 blur-3xl" />
+            <div className="evo-old absolute">
+              <Fagulin stage={item.from} size={200} silhouette />
+            </div>
+            <div className="evo-new">
+              <Fagulin stage={item.stage} size={200} silhouette />
+            </div>
+          </div>
+        )}
+
+        {(phase === 'drop' || phase === 'shake' || phase === 'open') && (
           <div className={phase === 'drop' ? 'pb-drop' : ''}>
             <div className={phase === 'shake' ? 'pb-shake' : ''}>
               <Pokeball size={120} open={phase === 'open'} blink={phase === 'shake'} />
@@ -191,11 +228,7 @@ function CelebrationOverlay({ item, onDone, remaining }: { item: Celebration; on
           <div className="relative" style={{ perspective: 800 }}>
             <div className="badge-pop">
               <div className="badge-float">
-                {isBadge ? (
-                  <GymBadge shape={item.badge.shape} icon={item.badge.icon} color={item.badge.color} tier={item.tier} size={168} />
-                ) : (
-                  <LevelEmblem level={item.level} size={168} />
-                )}
+                {visual}
               </div>
             </div>
           </div>
@@ -205,12 +238,10 @@ function CelebrationOverlay({ item, onDone, remaining }: { item: Celebration; on
       {phase === 'reveal' && (
         <div className="pop-in mt-2 text-center">
           <p className="label" style={{ color: metal[1] }}>
-            {isBadge ? (item.tier === 1 ? 'Nova insígnia' : 'Insígnia evoluiu') : 'Subiu de nível'}
+            {label}
           </p>
-          <p className="mt-1 font-display text-3xl font-bold">
-            {isBadge ? item.badge.name : `Nível ${item.level}`}
-          </p>
-          {isBadge && (
+          <p className="mt-1 font-display text-3xl font-bold">{title}</p>
+          {item.kind === 'badge' && (
             <span
               className="mt-2 inline-block rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider text-bg"
               style={{ background: `linear-gradient(135deg, ${metal[0]}, ${metal[1]})` }}
@@ -237,7 +268,14 @@ function CelebrationOverlay({ item, onDone, remaining }: { item: Celebration; on
             </div>
           </div>
         )}
-        {phase !== 'reveal' && <p className="text-center text-sm text-muted">Toque para pular</p>}
+        {phase === 'evolve' && (
+          <div className="relative mx-auto max-w-[620px] rounded-xl border-4 border-[#30304A] bg-[#F8F8F8] p-1 shadow-2xl">
+            <div className="rounded-md border-2 border-[#5A5A7A] px-4 py-4 sm:px-5">
+              <p className="min-h-[3.6em] font-pixel text-[11px] leading-[1.9] text-[#202030] sm:text-[13px]">O quê? O Fagulin está evoluindo!</p>
+            </div>
+          </div>
+        )}
+        {phase !== 'reveal' && phase !== 'evolve' && <p className="text-center text-sm text-muted">Toque para pular</p>}
       </div>
     </dialog>
   )

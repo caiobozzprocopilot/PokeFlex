@@ -19,6 +19,7 @@ import { Trainers } from './pages/Trainers'
 import { TrainerProfile } from './pages/TrainerProfile'
 import { PublicShell } from './components/layout/PublicShell'
 import { useSocial } from './store/social'
+import { useMascot } from './store/mascot'
 
 const PAGES = {
   inicio: Dashboard,
@@ -64,6 +65,7 @@ function App() {
     useProfile.getState().load(userId)
     useShowcases.getState().load(userId)
     useSocial.getState().load(userId)
+    useMascot.getState().load(userId)
   }, [authReady, userId])
 
   useEffect(() => {

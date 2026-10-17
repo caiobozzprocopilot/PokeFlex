@@ -79,6 +79,15 @@ export const sfx = {
       [N.G6, 1.22, 0.6],
       [N.E5, 1.22, 0.6, 'triangle'],
     ]),
+  // Zumbido subindo durante a evolução, cada vez mais rápido.
+  evolve: () =>
+    play(
+      Array.from({ length: 14 }, (_, i): Note => {
+        const t = 2.6 * (1 - Math.pow(1 - i / 14, 1.6))
+        return [N.C5 * Math.pow(2, i / 12), t, 0.08, i % 2 ? 'square' : 'triangle']
+      }),
+      0.035,
+    ),
   level: () =>
     play([
       [N.C5, 0, 0.08],

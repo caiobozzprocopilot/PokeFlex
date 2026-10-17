@@ -6,6 +6,7 @@ import { CARDS, OWNED } from '../data/mock'
 import { isDemo, supabase } from '../lib/supabase'
 import { pokedexName } from '../utils/achievements'
 import { useFx } from './fx'
+import { useMascot } from './mascot'
 
 export type Language = 'pt' | 'en' | 'jp' | 'es' | 'outro'
 
@@ -151,24 +152,28 @@ export const useCollection = create<CollectionState>()((set, get) => {
         !get().entries.some((e) => e.card.category === 'pokemon' && pokedexName(e.card.name) === dex)
       commit([optimistic, ...get().entries])
       useFx.getState().catchCard(entry.card, newEntry)
-      if (isDemo) return
+      const shiny = entry.variant === 'holo' || entry.variant === 'reverse'
+      if (isDemo) return useMascot.getState().event('card_add', entry.quantity, shiny)
       const { data, error } = await supabase!.from('collection_entries').insert(toRow(entry)).select(COLUMNS).single()
       if (error) {
         commit(get().entries.filter((e) => e.id !== optimistic.id))
         throw new Error(message('Não foi possível salvar a carta. Tente de novo.', error))
       }
       commit(get().entries.map((e) => (e.id === optimistic.id ? fromRow(data as Row) : e)))
+      useMascot.getState().event('card_add', entry.quantity, shiny)
     },
 
     remove: async (id) => {
       const before = get().entries
       commit(before.filter((e) => e.id !== id))
-      if (isDemo || id.startsWith('tmp-')) return
+      if (isDemo || id.startsWith('tmp-')) return useMascot.getState().event('card_remove')
       const { error } = await supabase!.from('collection_entries').delete().eq('id', id)
       if (error) {
         commit(before)
         set({ error: message('Não foi possível remover a carta. Tente de novo.', error) })
+        return
       }
+      useMascot.getState().event('card_remove')
     },
 
     // Troca concluída: tira as cópias entregues (primeiro da mesma variante) e adiciona as recebidas.

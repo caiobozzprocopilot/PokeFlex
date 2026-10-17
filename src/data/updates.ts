@@ -23,6 +23,33 @@ export type Release = {
 
 export const RELEASES: Release[] = [
   {
+    version: '0.11',
+    date: '2026-10-17',
+    title: 'Fagulin, seu mascote de streak',
+    intro: 'Um foguinho que cresce com a sua constância: cuide da coleção todo dia e veja ele evoluir por 12 formas.',
+    items: [
+      {
+        title: 'Streak diário e missões',
+        body: 'Todo dia em que você registra uma carta, escaneia, mexe nos desejos ou numa troca, a chama do Fagulin fica acesa e o streak cresce. Missões diárias e semanais dão XP extra.',
+        image: '/updates/fagulin-card.webp',
+        tip: 'O dia vira à meia-noite de Brasília. Complete as três missões da semana para ganhar um Cristal de Gelo: ele protege o streak num dia em que você não puder entrar.',
+        action: { label: 'Ver meu Fagulin', page: 'inicio' },
+      },
+      {
+        title: 'Evolução como nos jogos',
+        body: 'Com streak e XP suficientes, o Fagulin evolui com a animação clássica: as silhuetas da forma antiga e da nova se alternando até a revelação.',
+        image: '/updates/fagulin-evolucao.webp',
+        tip: 'A evolução é para sempre. Se a chama apagar, o Fagulin fica cinza e perde parte do XP do estágio, mas volta a brilhar com 3 dias seguidos de atividade.',
+      },
+      {
+        title: '12 formas, da Fagulha à Divindade',
+        body: 'Do ovo rachado até a Divindade Flamejante, cada forma tem animação própria: respira, flutua, solta faíscas e inclina em 3D quando você passa o dedo ou o mouse.',
+        image: '/updates/fagulin-divindade.webp',
+        tip: 'O número com a chama no topo da tela é o seu streak. Cinza quer dizer que ainda falta a atividade de hoje; piscando em vermelho, que a chama está em risco.',
+      },
+    ],
+  },
+  {
     version: '0.10',
     date: '2026-10-17',
     title: 'Trocas de cartas',

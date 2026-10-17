@@ -4,6 +4,7 @@ import { useFx, type Celebration } from '../store/fx'
 import { computeBadges, trainerLevel, trainerXp, type Tier } from '../utils/achievements'
 import { useCollectionPricing } from './useCollectionValue'
 import { postAchievement } from '../services/social'
+import { useMascot } from '../store/mascot'
 
 // Insígnias, XP e nível do treinador calculados da coleção real.
 export function useTrainer() {
@@ -13,6 +14,32 @@ export function useTrainer() {
   const badges = useMemo(() => computeBadges(entries, value), [entries, value])
   const level = useMemo(() => trainerLevel(trainerXp(entries, badges)), [entries, badges])
   return { badges, level, pricing }
+}
+
+// Evolução do Fagulin: comemora quando o estágio passa do último que o treinador viu.
+export function useMascotWatcher(userId: string | null) {
+  const stage = useMascot((s) => s.status?.stage)
+  const celebrate = useFx((s) => s.celebrate)
+
+  useEffect(() => {
+    if (!userId || !stage) return
+    const key = `pokeflex:mascot-stage:${userId}`
+    let seen: number | null = null
+    try {
+      const raw = localStorage.getItem(key)
+      seen = raw ? Number(raw) : null
+    } catch {
+      seen = null
+    }
+    if (seen !== null && stage > seen) celebrate([{ kind: 'mascot', key: `mascot-${stage}`, stage, from: seen }])
+    if (seen === null || stage > seen) {
+      try {
+        localStorage.setItem(key, String(stage))
+      } catch {
+        // Sem armazenamento: a evolução pode ser comemorada de novo.
+      }
+    }
+  }, [userId, stage, celebrate])
 }
 
 type Seen = { tiers: Record<string, Tier>; level: number }
@@ -60,11 +87,8 @@ export function useAchievementWatcher(userId: string | null) {
     if (items.length) {
       celebrate(items)
       for (const item of items) {
-        void postAchievement(
-          item.kind === 'badge'
-            ? { kind: 'badge', id: item.badge.id, name: item.badge.name, tier: item.tier }
-            : { kind: 'level', level: item.level, title: item.title },
-        ).catch(() => {})
+        if (item.kind === 'badge') void postAchievement({ kind: 'badge', id: item.badge.id, name: item.badge.name, tier: item.tier }).catch(() => {})
+        else if (item.kind === 'level') void postAchievement({ kind: 'level', level: item.level, title: item.title }).catch(() => {})
       }
     }
   }, [userId, status, pricing.loading, badges, level, celebrate])

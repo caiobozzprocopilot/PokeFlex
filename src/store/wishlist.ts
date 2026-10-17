@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { CardVariant, PokemonCard } from '../types/pokemon'
 import { isDemo, supabase } from '../lib/supabase'
+import { useMascot } from './mascot'
 
 export type WishItem = {
   id: string
@@ -86,7 +87,8 @@ export const useWishlist = create<WishlistState>()((set, get) => {
       const before = get().items
       const optimistic: WishItem = { id: tempId(), card, variant, targetPrice, addedAt: new Date().toISOString() }
       commit([optimistic, ...before])
-      if (isDemo) return
+      const kind = targetPrice !== undefined ? 'wish_target' : 'wish'
+      if (isDemo) return useMascot.getState().event(kind)
       const { data, error } = await supabase!
         .from('wishlist_items')
         .insert({ card_id: card.id, card, variant, target_price: targetPrice ?? null })
@@ -94,6 +96,7 @@ export const useWishlist = create<WishlistState>()((set, get) => {
         .single()
       if (error) return fail('Não foi possível adicionar à lista de desejos.', error, before)
       commit(get().items.map((i) => (i.id === optimistic.id ? fromRow(data as Row) : i)))
+      useMascot.getState().event(kind)
     },
 
     remove: async (id) => {
@@ -117,13 +120,15 @@ export const useWishlist = create<WishlistState>()((set, get) => {
 
     setTarget: async (id, targetPrice) => {
       const before = get().items
+      const kind = targetPrice !== undefined && before.find((i) => i.id === id)?.targetPrice === undefined ? 'wish_target' : 'wish'
       commit(before.map((i) => (i.id === id ? { ...i, targetPrice } : i)))
-      if (isDemo || id.startsWith('tmp-')) return
+      if (isDemo || id.startsWith('tmp-')) return useMascot.getState().event(kind)
       const { error } = await supabase!
         .from('wishlist_items')
         .update({ target_price: targetPrice ?? null })
         .eq('id', id)
-      if (error) fail('Não foi possível salvar o preço-alvo.', error, before)
+      if (error) return fail('Não foi possível salvar o preço-alvo.', error, before)
+      useMascot.getState().event(kind)
     },
 
     dismissError: () => set({ error: null }),

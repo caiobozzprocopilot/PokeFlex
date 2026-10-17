@@ -6,6 +6,7 @@ import { useWishlist } from '../../store/wishlist'
 import { useSocial } from '../../store/social'
 import { useTrades } from '../../store/trades'
 import { useUi } from '../../store/ui'
+import { useMascot } from '../../store/mascot'
 import { useResource } from '../../hooks/useResource'
 import { fetchMatches, proposeTrade, type MatchCard, type Trade, type TradeItem, type TradeMatch, type TradeStatus } from '../../services/trades'
 import { VARIANT_LABEL } from '../../utils/collection'
@@ -121,6 +122,7 @@ function ProposeDialog({ match, onClose, onSent }: { match: TradeMatch | null; o
     setError(null)
     try {
       await proposeTrade(match.trainer.id, pick(match.iHave, give), pick(match.theyHave, receive), message)
+      useMascot.getState().event('trade')
       onSent()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Não foi possível enviar.')

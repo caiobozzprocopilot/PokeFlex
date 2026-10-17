@@ -5,6 +5,7 @@ import type { Badge, Tier } from '../utils/achievements'
 export type Celebration =
   | { kind: 'badge'; key: string; badge: Badge; tier: Tier }
   | { kind: 'level'; key: string; level: number; title: string }
+  | { kind: 'mascot'; key: string; stage: number; from: number }
 
 export type Gotcha = { key: string; card: PokemonCard; newEntry: boolean }
 

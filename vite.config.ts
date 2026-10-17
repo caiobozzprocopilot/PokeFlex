@@ -63,6 +63,12 @@ export default defineConfig({
             options: { cacheName: 'intro', rangeRequests: true, cacheableResponse: { statuses: [0, 200] } },
           },
           {
+            // Arte do Fagulin: só a forma atual é baixada, e fica guardada.
+            urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/mascot/'),
+            handler: 'CacheFirst',
+            options: { cacheName: 'mascote', expiration: { maxEntries: 16, maxAgeSeconds: 365 * DAY } },
+          },
+          {
             urlPattern: ({ url }) => url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com',
             handler: 'StaleWhileRevalidate',
             options: { cacheName: 'fontes', expiration: { maxEntries: 20, maxAgeSeconds: 365 * DAY } },

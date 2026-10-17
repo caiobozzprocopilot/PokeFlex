@@ -12,7 +12,9 @@ import { useProfile } from '../../store/profile'
 import { Avatar } from '../profile/Avatar'
 import { useInstallPrompt } from '../../hooks/useInstallPrompt'
 import { useUpdates } from '../../store/updates'
-import { useAchievementWatcher } from '../../hooks/useTrainer'
+import { useAchievementWatcher, useMascotWatcher } from '../../hooks/useTrainer'
+import { StreakChip } from '../mascot/MascotCard'
+import { useMascot } from '../../store/mascot'
 import { Celebrations } from '../gamification/Celebrations'
 
 const NAV: { page: Page; label: string; icon: LucideIcon }[] = [
@@ -96,6 +98,11 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
   const setScanning = useUi((s) => s.setScanning)
   const [scanned, setScanned] = useState<PokemonCard | null>(null)
   useAchievementWatcher(user.id)
+  useMascotWatcher(user.id)
+  const openMascot = () => {
+    go('inicio')
+    window.setTimeout(() => document.getElementById('fagulin')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 350)
+  }
   const wishes = useWishlist((s) => s.items)
   const alerts = useWishlistPricing(wishes).list.filter((w) => w.belowTarget).length
   const tradeAlerts = useTradeAlerts()
@@ -171,7 +178,8 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
               <Logo />
             </div>
             <HeaderSearch />
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <StreakChip onClick={openMascot} />
               <button
                 onClick={() => go('novidades')}
                 aria-label={unseenUpdate ? 'Novidades (há atualização nova)' : 'Novidades'}
@@ -247,6 +255,7 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
         open={scanning}
         onClose={() => setScanning(false)}
         onPick={(card) => {
+          useMascot.getState().event('scan')
           setScanning(false)
           setScanned(card)
         }}

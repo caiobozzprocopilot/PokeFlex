@@ -19,6 +19,7 @@ import { ProgressBar } from '../components/ui/ProgressBar'
 import { StatTile } from '../components/ui/StatTile'
 import { CardTile } from '../components/pokemon/CardTile'
 import { PokeballDeco, TrainerCard } from '../components/gamification/TrainerCard'
+import { MascotCard } from '../components/mascot/MascotCard'
 
 const SURFACE = '#13131A'
 
@@ -141,6 +142,10 @@ export function Dashboard() {
           )}
         </div>
       </section>
+
+      <div className="boot" style={bootAt(4)}>
+        <MascotCard />
+      </div>
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <div className="boot" style={bootAt(4)}>
