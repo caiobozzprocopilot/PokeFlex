@@ -23,6 +23,33 @@ export type Release = {
 
 export const RELEASES: Release[] = [
   {
+    version: '0.10',
+    date: '2026-10-17',
+    title: 'Trocas de cartas',
+    intro: 'O PokeFlex agora encontra quem tem as cartas que você quer e quem quer as suas repetidas.',
+    items: [
+      {
+        title: 'Trocas possíveis',
+        body: 'Em Social → Trocas, ligue "Participar das trocas". O PokeFlex cruza suas repetidas com os desejos de outros treinadores (e o contrário) e mostra cada combinação. "Troca perfeita" é quando os dois lados ganham.',
+        image: '/updates/trocas-possiveis.webp',
+        tip: 'Sua lista de desejos continua privada: uma carta desejada só aparece para quem tem uma repetida dela. Quanto mais desejos você cadastrar, mais trocas aparecem.',
+        action: { label: 'Ver minhas trocas', page: 'treinadores' },
+      },
+      {
+        title: 'Proponha em dois toques',
+        body: 'Escolha o que você entrega e o que recebe, escreva uma mensagem e envie. O outro treinador aceita ou recusa, e o número no menu Social avisa quando algo espera por você.',
+        image: '/updates/troca-proposta.webp',
+        tip: 'Só dá para oferecer cartas que estão na sua coleção, e a mesma pessoa recebe no máximo 3 propostas suas esperando resposta.',
+      },
+      {
+        title: 'Coleção atualizada sozinha',
+        body: 'Combinem a entrega. Quando as cartas chegarem, toque em "Recebi as cartas" e depois em "Atualizar minha coleção": as entregues saem, as recebidas entram com um Gotcha! e saem dos seus desejos.',
+        image: '/updates/troca-concluida.webp',
+        tip: 'As cartas recebidas entram como Near Mint em português. Se não for o caso, ajuste no detalhe da carta.',
+      },
+    ],
+  },
+  {
     version: '0.9',
     date: '2026-10-16',
     title: 'Convite com QR code na Pokébola',

@@ -76,7 +76,7 @@ export function PublicProfileSettings() {
     setSaving(true)
     setError(null)
     try {
-      await save(user.id, { username: handle || null, isPublic, showValue, bio })
+      await save(user.id, { ...settings, username: handle || null, isPublic, showValue, bio })
       setSaved(true)
       window.setTimeout(() => setSaved(false), 2500)
     } catch (err) {

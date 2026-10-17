@@ -34,8 +34,11 @@ type CollectionState = {
   load: (userId: string | null) => Promise<void>
   add: (entry: NewEntry) => Promise<void>
   remove: (id: string) => Promise<void>
+  applyTrade: (give: TradeCard[], receive: TradeCard[]) => Promise<void>
   dismissError: () => void
 }
+
+type TradeCard = { card: PokemonCard; variant: CardVariant; quantity: number }
 
 type Row = {
   id: string
@@ -165,6 +168,47 @@ export const useCollection = create<CollectionState>()((set, get) => {
       if (error) {
         commit(before)
         set({ error: message('Não foi possível remover a carta. Tente de novo.', error) })
+      }
+    },
+
+    // Troca concluída: tira as cópias entregues (primeiro da mesma variante) e adiciona as recebidas.
+    applyTrade: async (give, receive) => {
+      const before = get().entries
+      const updates: { id: string; quantity: number }[] = []
+      const deletes: string[] = []
+      let entries = [...before]
+      for (const g of give) {
+        let left = g.quantity
+        const candidates = entries
+          .filter((e) => e.card.id === g.card.id)
+          .sort((a, b) => Number(b.variant === g.variant) - Number(a.variant === g.variant))
+        for (const e of candidates) {
+          if (left <= 0) break
+          if (e.quantity > left) {
+            updates.push({ id: e.id, quantity: e.quantity - left })
+            entries = entries.map((x) => (x.id === e.id ? { ...x, quantity: x.quantity - left } : x))
+            left = 0
+          } else {
+            deletes.push(e.id)
+            entries = entries.filter((x) => x.id !== e.id)
+            left -= e.quantity
+          }
+        }
+      }
+      commit(entries)
+      if (!isDemo) {
+        const saved = deletes.filter((id) => !id.startsWith('tmp-'))
+        const results = await Promise.all([
+          ...updates.filter((u) => !u.id.startsWith('tmp-')).map((u) => supabase!.from('collection_entries').update({ quantity: u.quantity }).eq('id', u.id)),
+          ...(saved.length ? [supabase!.from('collection_entries').delete().in('id', saved)] : []),
+        ])
+        if (results.some((r) => r.error)) {
+          commit(before)
+          throw new Error('Não foi possível atualizar a coleção. Tente de novo.')
+        }
+      }
+      for (const r of receive) {
+        await get().add({ card: r.card, variant: r.variant, condition: 'NM', language: 'pt', quantity: r.quantity })
       }
     },
 

@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CloudOff, Globe2, Search, Users } from 'lucide-react'
+import { CloudOff, Globe2, Repeat2, Search, Users } from 'lucide-react'
+import { useTradeAlerts } from '../store/trades'
+import { TradesPanel } from '../components/social/Trades'
 import { useAuth } from '../store/auth'
 import { useCollection } from '../store/collection'
 import { useSocial } from '../store/social'
@@ -20,6 +22,13 @@ export function Trainers() {
   const [query, setQuery] = useState('')
   // Muda quando você segue alguém, para o feed buscar as novidades dessa pessoa.
   const [version, setVersion] = useState(0)
+  const [tab, setTab] = useState<'atividade' | 'trocas'>(() => (window.location.hash.includes('aba=trocas') ? 'trocas' : 'atividade'))
+  const alerts = useTradeAlerts()
+
+  const selectTab = (next: 'atividade' | 'trocas') => {
+    setTab(next)
+    history.replaceState(null, '', next === 'trocas' ? '#/treinadores?aba=trocas' : '#/treinadores')
+  }
 
   useEffect(() => {
     const t = setTimeout(() => setQuery(draft.trim()), 350)
@@ -59,11 +68,35 @@ export function Trainers() {
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-        <section aria-labelledby="feed-title">
-          <h2 id="feed-title" className="mb-3 text-lg font-semibold">
-            Atividade
-          </h2>
-          {feed.error ? (
+        <section>
+          <div className="mb-4 flex w-fit rounded-xl border border-line bg-surface p-1" role="tablist" aria-label="Social">
+            {(
+              [
+                ['atividade', 'Atividade', Users],
+                ['trocas', 'Trocas', Repeat2],
+              ] as const
+            ).map(([id, label, Icon]) => (
+              <button
+                key={id}
+                role="tab"
+                aria-selected={tab === id}
+                onClick={() => selectTab(id)}
+                className={`flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-medium transition-colors ${
+                  tab === id ? 'bg-raised text-ink' : 'text-muted hover:text-ink'
+                }`}
+              >
+                <Icon size={16} aria-hidden /> {label}
+                {id === 'trocas' && alerts > 0 && (
+                  <span className="grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1.5 font-mono text-[11px] font-semibold text-white">
+                    {alerts}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+          {tab === 'trocas' ? (
+            <TradesPanel />
+          ) : feed.error ? (
             <div className="panel flex flex-col items-center px-6 py-12 text-center">
               <CloudOff size={28} className="text-muted" aria-hidden />
               <p className="mt-3 text-sm text-muted">{feed.error}</p>

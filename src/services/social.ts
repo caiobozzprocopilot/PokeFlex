@@ -5,7 +5,7 @@ import type { ShowcaseStyle } from '../store/showcases'
 import { isDemo, supabase } from '../lib/supabase'
 import { card as baseCard } from '../data/mock'
 
-export type SocialSettings = { username: string | null; isPublic: boolean; showValue: boolean; bio: string }
+export type SocialSettings = { username: string | null; isPublic: boolean; showValue: boolean; bio: string; openToTrade?: boolean }
 
 export type PublicShowcase = { id: string; name: string; cardIds: string[]; style: ShowcaseStyle; featured: boolean }
 
@@ -60,7 +60,7 @@ export function profileLink(username: string) {
 const DAY = 24 * 60 * 60 * 1000
 const ago = (ms: number) => new Date(Date.now() - ms).toISOString()
 
-type DemoTrainer = Omit<PublicProfile, 'isFollowing' | 'followers'> & { baseFollowers: number }
+export type DemoTrainer = Omit<PublicProfile, 'isFollowing' | 'followers'> & { baseFollowers: number }
 
 const demoEntries = (prefix: string, cards: [PokemonCard, number, CardVariant?][]): CollectionEntry[] =>
   cards.map(([c, quantity, variant], i) => ({
@@ -73,7 +73,13 @@ const demoEntries = (prefix: string, cards: [PokemonCard, number, CardVariant?][
     addedAt: ago((i + 1) * 0.6 * DAY),
   }))
 
-const DEMO_TRAINERS: DemoTrainer[] = [
+// Cartas que cada treinador fictício procura, para as trocas da demonstração.
+export const DEMO_WANTS: Record<string, string[]> = {
+  'demo-misty': ['base1-58', 'base1-18', 'base1-4'],
+  'demo-brock': ['base1-46', 'base1-17', 'base1-16'],
+}
+
+export const DEMO_TRAINERS: DemoTrainer[] = [
   {
     id: 'demo-misty',
     username: 'misty',
@@ -129,7 +135,7 @@ const DEMO_TRAINERS: DemoTrainer[] = [
 
 const DEMO_KEYS = { settings: 'pokeflex-social', following: 'pokeflex-following' }
 
-const readJson = <T>(key: string, fallback: T): T => {
+export const readJson = <T>(key: string, fallback: T): T => {
   try {
     const raw = localStorage.getItem(key)
     return raw ? (JSON.parse(raw) as T) : fallback
@@ -138,7 +144,7 @@ const readJson = <T>(key: string, fallback: T): T => {
   }
 }
 
-const writeJson = (key: string, value: unknown) => {
+export const writeJson = (key: string, value: unknown) => {
   try {
     localStorage.setItem(key, JSON.stringify(value))
   } catch {
@@ -210,10 +216,20 @@ type ProfileRow = {
 
 export async function fetchMySettings(userId: string): Promise<SocialSettings> {
   if (isDemo) return readJson<SocialSettings>(DEMO_KEYS.settings, { username: null, isPublic: false, showValue: false, bio: '' })
-  const { data, error } = await supabase!.from('profiles').select('username, is_public, show_value, bio').eq('id', userId).maybeSingle()
+  const { data, error } = await supabase!
+    .from('profiles')
+    .select('username, is_public, show_value, bio, open_to_trade')
+    .eq('id', userId)
+    .maybeSingle()
   if (error) throw failure('Não foi possível carregar seu perfil público.', error.message)
-  const row = data as { username: string | null; is_public: boolean; show_value: boolean; bio: string | null } | null
-  return { username: row?.username ?? null, isPublic: !!row?.is_public, showValue: !!row?.show_value, bio: row?.bio ?? '' }
+  const row = data as { username: string | null; is_public: boolean; show_value: boolean; bio: string | null; open_to_trade: boolean } | null
+  return {
+    username: row?.username ?? null,
+    isPublic: !!row?.is_public,
+    showValue: !!row?.show_value,
+    bio: row?.bio ?? '',
+    openToTrade: !!row?.open_to_trade,
+  }
 }
 
 export async function saveMySettings(userId: string, s: SocialSettings) {
@@ -223,11 +239,11 @@ export async function saveMySettings(userId: string, s: SocialSettings) {
   if (username && !USERNAME_RE.test(username)) throw new Error('Use de 3 a 20 letras minúsculas, números ou _ no nome de usuário.')
   if (bio.length > 160) throw new Error('A bio pode ter até 160 caracteres.')
   if (username && DEMO_TRAINERS.some((t) => t.username === username) && isDemo) throw new Error('Esse nome de usuário já está em uso.')
-  const clean = { username, isPublic: s.isPublic, showValue: s.showValue, bio }
+  const clean = { username, isPublic: s.isPublic, showValue: s.showValue, bio, openToTrade: !!s.openToTrade }
   if (isDemo) return writeJson(DEMO_KEYS.settings, clean)
   const { error } = await supabase!
     .from('profiles')
-    .update({ username, is_public: s.isPublic, show_value: s.showValue, bio: bio || null })
+    .update({ username, is_public: s.isPublic, show_value: s.showValue, bio: bio || null, open_to_trade: !!s.openToTrade })
     .eq('id', userId)
   if (error?.code === '23505') throw new Error('Esse nome de usuário já está em uso.')
   if (error) throw failure('Não foi possível salvar o perfil público.', error.message)

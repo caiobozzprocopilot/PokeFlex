@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent, type ReactNode } from 'react'
 import { Camera, Download, Heart, Sparkles, Home, Layers, LogOut, Search, TrendingUp, User, Users, type LucideIcon } from 'lucide-react'
 import type { PokemonCard } from '../../types/pokemon'
+import { useTradeAlerts, useTrades } from '../../store/trades'
 import { Scanner } from '../scanner/Scanner'
 import { CardDetail } from '../pokemon/CardDetail'
 import { useUi, type Page } from '../../store/ui'
@@ -97,11 +98,26 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
   useAchievementWatcher(user.id)
   const wishes = useWishlist((s) => s.items)
   const alerts = useWishlistPricing(wishes).list.filter((w) => w.belowTarget).length
+  const tradeAlerts = useTradeAlerts()
+  const loadTrades = useTrades((s) => s.load)
+
+  // Propostas novas chegam sem aviso do servidor: confere ao abrir e a cada minuto.
+  useEffect(() => {
+    void loadTrades()
+    const t = window.setInterval(() => void loadTrades(), 60_000)
+    return () => window.clearInterval(t)
+  }, [loadTrades, user.id])
+
   const badge = (p: Page) =>
     p === 'desejos' && alerts > 0 ? (
       <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-success px-1.5 font-mono text-[11px] font-semibold text-bg">
         {alerts}
         <span className="sr-only"> abaixo do alvo</span>
+      </span>
+    ) : p === 'treinadores' && tradeAlerts > 0 ? (
+      <span className="ml-auto grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1.5 font-mono text-[11px] font-semibold text-white">
+        {tradeAlerts}
+        <span className="sr-only"> trocas esperando você</span>
       </span>
     ) : null
 
@@ -213,6 +229,14 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
                     className="absolute right-[22%] top-2.5 h-2 w-2 rounded-full bg-success"
                     aria-label={`${alerts} abaixo do alvo`}
                   />
+                )}
+                {p === 'treinadores' && tradeAlerts > 0 && (
+                  <span
+                    className="absolute right-[22%] top-2 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 font-mono text-[10px] font-semibold text-white"
+                    aria-label={`${tradeAlerts} trocas esperando você`}
+                  >
+                    {tradeAlerts}
+                  </span>
                 )}
               </button>
             )
