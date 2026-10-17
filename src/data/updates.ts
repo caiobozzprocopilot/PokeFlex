@@ -23,6 +23,41 @@ export type Release = {
 
 export const RELEASES: Release[] = [
   {
+    version: '0.7',
+    date: '2026-10-16',
+    title: 'Insígnias e nível de treinador',
+    intro: 'Sua coleção agora rende insígnias, XP e comemorações no melhor estilo Pokémon.',
+    items: [
+      {
+        title: 'Estojo de insígnias',
+        body: 'São 12 insígnias, cada uma com 4 níveis: Bronze, Prata, Ouro e Mestre. Tem Pokédex, Lendário, Fã de Pikachu, Mestre do Set e mais. Toque numa insígnia para ver o que falta para o próximo nível.',
+        image: '/updates/estojo-insignias.webp',
+        tip: 'Na Pokédex, "Charizard ex", "Dark Charizard" e "Mega Charizard X" contam como um só Charizard. Para subir rápido, varie os Pokémon.',
+        action: { label: 'Abrir o estojo', page: 'perfil' },
+      },
+      {
+        title: 'Nível de treinador',
+        body: 'Cada carta diferente vale 10 XP, cópias extras valem 2 e cada nível de insígnia dá um bônus. Você sobe de Treinador Iniciante até Mestre Pokémon. O "Quase lá" no Início mostra a insígnia mais perto de subir.',
+        image: '/updates/cartao-treinador.webp',
+        tip: 'Tudo vem da sua coleção real: tirar uma carta pode baixar o XP, mas uma insígnia conquistada nunca é comemorada duas vezes.',
+        action: { label: 'Ver no Início', page: 'inicio' },
+      },
+      {
+        title: 'Comemoração de insígnia',
+        body: 'Ao conquistar ou evoluir uma insígnia, a Pokébola cai, balança três vezes e abre com som 8-bit, confete e a mensagem na caixa de texto dos jogos.',
+        image: '/updates/insignia-conquistada.webp',
+        tip: 'Toque na tela para pular a animação ou acelerar o texto. O botão de som no canto liga e desliga os efeitos.',
+      },
+      {
+        title: 'Gotcha!',
+        body: 'Toda carta adicionada é "capturada": a Pokébola balança e trava. Se for um Pokémon que você ainda não tinha, aparece "Novo registro na Pokédex!".',
+        image: '/updates/gotcha.webp',
+        tip: 'Funciona também quando você adiciona pela câmera, então escanear uma pilha de cartas vira uma sequência de capturas.',
+        action: { label: 'Escanear uma carta', scan: true },
+      },
+    ],
+  },
+  {
     version: '0.6',
     date: '2026-10-16',
     title: 'Preços à vista e melhor no celular',

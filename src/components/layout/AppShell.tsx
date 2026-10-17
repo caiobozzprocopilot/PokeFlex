@@ -11,6 +11,8 @@ import { useProfile } from '../../store/profile'
 import { Avatar } from '../profile/Avatar'
 import { useInstallPrompt } from '../../hooks/useInstallPrompt'
 import { useUpdates } from '../../store/updates'
+import { useAchievementWatcher } from '../../hooks/useTrainer'
+import { Celebrations } from '../gamification/Celebrations'
 
 const NAV: { page: Page; label: string; icon: LucideIcon }[] = [
   { page: 'inicio', label: 'Início', icon: Home },
@@ -88,6 +90,7 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
   const unseenUpdate = useUpdates((s) => s.unseen)
   const setScanning = useUi((s) => s.setScanning)
   const [scanned, setScanned] = useState<PokemonCard | null>(null)
+  useAchievementWatcher(user.id)
   const wishes = useWishlist((s) => s.items)
   const alerts = useWishlistPricing(wishes).list.filter((w) => w.belowTarget).length
   const badge = (p: Page) =>
@@ -225,6 +228,7 @@ export function AppShell({ children, boot = false }: { children: ReactNode; boot
         }}
       />
       <CardDetail card={scanned} initialView="add" onClose={() => setScanned(null)} />
+      <Celebrations />
     </div>
   )
 }

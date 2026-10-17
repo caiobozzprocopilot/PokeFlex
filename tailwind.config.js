@@ -22,6 +22,7 @@ export default {
         display: ['Poppins', 'sans-serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['IBM Plex Mono', 'monospace'],
+        pixel: ['"Press Start 2P"', 'monospace'],
       },
       boxShadow: {
         card: '0 1px 0 rgb(255 255 255 / 0.04) inset, 0 8px 24px -12px rgb(0 0 0 / 0.6)',

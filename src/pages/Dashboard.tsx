@@ -10,7 +10,7 @@ import { TopCardSpotlight } from '../components/pokemon/TopCardSpotlight'
 import { useCollectionPricing } from '../hooks/useCollectionValue'
 import { useWishlistPricing } from '../hooks/useWishlistPricing'
 import { formatBRL } from '../services/pricing'
-import { computeBadges } from '../utils/achievements'
+import { computeBadges, trainerLevel, trainerXp } from '../utils/achievements'
 import { setsInProgress } from '../utils/sets'
 import { useUi } from '../store/ui'
 import { useAuth } from '../store/auth'
@@ -18,7 +18,7 @@ import { Button } from '../components/ui/Button'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { StatTile } from '../components/ui/StatTile'
 import { CardTile } from '../components/pokemon/CardTile'
-import { BadgeMedal } from '../components/gamification/BadgeMedal'
+import { PokeballDeco, TrainerCard } from '../components/gamification/TrainerCard'
 
 const SURFACE = '#13131A'
 
@@ -47,7 +47,11 @@ export function Dashboard() {
     () => computeBadges(owned.entries, pricing.loading ? null : pricing.total),
     [owned.entries, pricing.loading, pricing.total],
   )
-  const unlocked = badges.filter((b) => b.unlocked).length
+  const level = useMemo(() => trainerLevel(trainerXp(owned.entries, badges)), [owned.entries, badges])
+  const openBadges = () => {
+    go('perfil')
+    window.setTimeout(() => document.getElementById('insignias')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 350)
+  }
   const alerts = wishPricing.list.filter((w) => w.belowTarget).length
   const monthPct = pricing.monthAvg30 > 0 ? ((pricing.monthNow - pricing.monthAvg30) / pricing.monthAvg30) * 100 : null
   const empty = owned.entries.length === 0
@@ -62,6 +66,7 @@ export function Dashboard() {
           aria-hidden
           className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl"
         />
+        <PokeballDeco className="-bottom-28 -left-28 h-80 w-80 text-white/[0.035]" />
         <div className="relative p-6 pb-0 sm:p-8 sm:pb-0 lg:pb-8">
           <p className="label">Sua coleção</p>
           <h1 className="mt-2 text-3xl font-bold leading-tight sm:text-4xl">
@@ -175,14 +180,18 @@ export function Dashboard() {
         </div>
       </section>
 
+      <div className="boot" style={bootAt(8)}>
+        <TrainerCard level={level} badges={badges} onOpenBadges={openBadges} />
+      </div>
+
       {!empty && (
-        <div className="boot" style={bootAt(8)}>
+        <div className="boot" style={bootAt(9)}>
           <TopCardSpotlight pricing={pricing} onOpen={setSelected} />
         </div>
       )}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-        <section className="boot" style={bootAt(9)}>
+        <section className="boot" style={bootAt(10)}>
           <div className="mb-4 flex items-end justify-between">
             <h2 className="text-lg font-semibold">Adicionadas recentemente</h2>
             {!empty && (
@@ -204,7 +213,7 @@ export function Dashboard() {
           )}
         </section>
 
-        <section className="boot panel p-5" style={bootAt(10)}>
+        <section className="boot panel p-5" style={bootAt(11)}>
           <h2 className="mb-4 text-lg font-semibold">Seus sets</h2>
           {sets.length ? (
             <ul className="space-y-4">
@@ -229,20 +238,6 @@ export function Dashboard() {
           )}
         </section>
       </div>
-
-      <section className="boot panel p-5" style={bootAt(11)}>
-        <div className="mb-5 flex items-end justify-between">
-          <h2 className="text-lg font-semibold">Conquistas</h2>
-          <button onClick={() => go('perfil')} className="text-sm text-muted hover:text-primary">
-            {unlocked} de {badges.length}
-          </button>
-        </div>
-        <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
-          {badges.map((b) => (
-            <BadgeMedal key={b.id} badge={b} compact />
-          ))}
-        </div>
-      </section>
 
       <CardDetail card={selected} onClose={() => setSelected(null)} />
     </div>

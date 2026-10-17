@@ -8,11 +8,12 @@ import { useShowcases, type Showcase } from '../store/showcases'
 import { useInstallPrompt } from '../hooks/useInstallPrompt'
 import { useCollectionPricing } from '../hooks/useCollectionValue'
 import { formatBRL } from '../services/pricing'
-import { computeBadges } from '../utils/achievements'
+import { computeBadges, trainerLevel, trainerXp } from '../utils/achievements'
 import { TYPE_INFO } from '../utils/pokemon'
 import { Button } from '../components/ui/Button'
 import { StatTile } from '../components/ui/StatTile'
-import { BadgeMedal } from '../components/gamification/BadgeMedal'
+import { BadgeCase } from '../components/gamification/BadgeCase'
+import { PokeballDeco, XpBar } from '../components/gamification/TrainerCard'
 import { Avatar } from '../components/profile/Avatar'
 import { ProfileEditor } from '../components/profile/ProfileEditor'
 import { ShowcaseEditor } from '../components/profile/ShowcaseEditor'
@@ -47,7 +48,8 @@ export function Profile() {
     () => computeBadges(owned.entries, pricing.loading ? null : pricing.total),
     [owned.entries, pricing.loading, pricing.total],
   )
-  const unlocked = badges.filter((b) => b.unlocked).length
+  const unlocked = badges.filter((b) => b.tier > 0).length
+  const level = useMemo(() => trainerLevel(trainerXp(owned.entries, badges)), [owned.entries, badges])
 
   const byType = Object.entries(TYPE_INFO)
     .map(([type, info]) => ({
@@ -71,6 +73,7 @@ export function Profile() {
     <div className="space-y-6">
       <section className="panel relative overflow-hidden p-6 sm:p-8">
         <div aria-hidden className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
+        <PokeballDeco className="-right-20 -top-24 h-72 w-72 text-white/[0.04]" />
         <div className="relative flex flex-col items-center gap-6 text-center sm:flex-row sm:text-left">
           <button
             onClick={() => setEditingProfile(true)}
@@ -82,9 +85,15 @@ export function Profile() {
               <Pencil size={20} aria-hidden />
             </span>
           </button>
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold">{user.name}</h1>
+          <div className="w-full flex-1 sm:w-auto">
+            <div className="flex flex-col items-center gap-x-3 gap-y-1 sm:flex-row sm:items-baseline">
+              <h1 className="text-3xl font-bold">{user.name}</h1>
+              <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                NV {level.level} · {level.title}
+              </span>
+            </div>
             <p className="text-muted">{user.email}</p>
+            <XpBar level={level} className="mx-auto mt-3 max-w-sm sm:mx-0" />
           </div>
           <div className="flex flex-wrap justify-center gap-2">
             {installable && (
@@ -113,8 +122,10 @@ export function Profile() {
           tone="success"
         />
         <StatTile icon={Library} label="Coleções" value={sets} />
-        <StatTile icon={Award} label="Conquistas" value={`${unlocked}/${badges.length}`} tone="accent" />
+        <StatTile icon={Award} label="Insígnias" value={`${unlocked}/${badges.length}`} hint={`nível ${level.level}`} tone="accent" />
       </section>
+
+      <BadgeCase badges={badges} />
 
       <section className="panel overflow-hidden" aria-labelledby="showcases-title">
         <div className="flex flex-wrap items-center justify-between gap-3 p-5 pb-0">
@@ -199,8 +210,7 @@ export function Profile() {
         )}
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
-        <section className="panel p-5">
+      <section className="panel p-5">
           <h2 className="mb-5 text-lg font-semibold">Cartas por tipo</h2>
           {byType.length ? (
             <ul className="space-y-3.5">
@@ -218,21 +228,6 @@ export function Profile() {
             <p className="text-sm text-muted">Adicione cartas Pokémon para ver a distribuição por tipo.</p>
           )}
         </section>
-
-        <section className="panel p-5">
-          <div className="mb-5 flex items-baseline justify-between">
-            <h2 className="text-lg font-semibold">Conquistas</h2>
-            <span className="font-mono text-xs text-muted">
-              {unlocked}/{badges.length}
-            </span>
-          </div>
-          <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3">
-            {badges.map((b) => (
-              <BadgeMedal key={b.id} badge={b} />
-            ))}
-          </div>
-        </section>
-      </div>
 
       <ProfileEditor open={editingProfile} onClose={() => setEditingProfile(false)} />
       <ShowcaseEditor

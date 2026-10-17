@@ -4,6 +4,8 @@ import type { CardVariant, PokemonCard } from '../types/pokemon'
 import type { Condition } from '../services/pricing'
 import { CARDS, OWNED } from '../data/mock'
 import { isDemo, supabase } from '../lib/supabase'
+import { pokedexName } from '../utils/achievements'
+import { useFx } from './fx'
 
 export type Language = 'pt' | 'en' | 'jp' | 'es' | 'outro'
 
@@ -139,7 +141,12 @@ export const useCollection = create<CollectionState>()((set, get) => {
 
     add: async (entry) => {
       const optimistic: CollectionEntry = { ...entry, id: tempId(), addedAt: new Date().toISOString() }
+      const dex = pokedexName(entry.card.name)
+      const newEntry =
+        entry.card.category === 'pokemon' &&
+        !get().entries.some((e) => e.card.category === 'pokemon' && pokedexName(e.card.name) === dex)
       commit([optimistic, ...get().entries])
+      useFx.getState().catchCard(entry.card, newEntry)
       if (isDemo) return
       const { data, error } = await supabase!.from('collection_entries').insert(toRow(entry)).select(COLUMNS).single()
       if (error) {

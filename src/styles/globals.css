@@ -180,6 +180,168 @@ h1, h2, h3, h4 {
   to { background-position: 0 -10%; opacity: 0; }
 }
 
+/* ---------- Gamificação ---------- */
+
+/* Reflexo que passa pela insígnia de tempos em tempos */
+.badge-shine {
+  transform: translateX(-30px) rotate(20deg);
+  animation: badgeShine 5s ease-in-out infinite;
+  animation-delay: var(--shine-delay, 1.2s);
+}
+@keyframes badgeShine {
+  0%, 70% { transform: translateX(-30px) rotate(20deg); }
+  90%, 100% { transform: translateX(110px) rotate(20deg); }
+}
+
+/* Pokébola: balança 3 vezes e trava */
+.pb-shake {
+  transform-origin: 50% 90%;
+  animation: pbShake 1.5s ease-in-out both;
+}
+@keyframes pbShake {
+  0%, 12% { transform: rotate(0); }
+  18% { transform: rotate(-22deg); }
+  26% { transform: rotate(18deg); }
+  32%, 44% { transform: rotate(0); }
+  50% { transform: rotate(-20deg); }
+  58% { transform: rotate(16deg); }
+  64%, 76% { transform: rotate(0); }
+  82% { transform: rotate(-16deg); }
+  90% { transform: rotate(12deg); }
+  96%, 100% { transform: rotate(0); }
+}
+.pb-drop {
+  animation: pbDrop 600ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+@keyframes pbDrop {
+  from { transform: translateY(-70vh) rotate(-540deg); }
+  to { transform: none; }
+}
+.pb-button-blink {
+  animation: pbBlink 500ms steps(2) 3;
+}
+@keyframes pbBlink {
+  50% { fill: #ff4d4d; }
+}
+.pb-top {
+  transform-box: fill-box;
+  transform-origin: 85% 100%;
+  transition: transform 380ms cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+.pb-open .pb-top {
+  transform: rotate(-38deg) translateY(-6px);
+}
+
+/* Raios girando atrás da recompensa */
+.burst-rays {
+  background: repeating-conic-gradient(from 0deg, var(--ray, rgb(255 214 10 / 0.22)) 0deg 9deg, transparent 9deg 22.5deg);
+  mask-image: radial-gradient(circle, #000 15%, transparent 68%);
+  -webkit-mask-image: radial-gradient(circle, #000 15%, transparent 68%);
+  animation: spin 18s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.flash {
+  animation: flash 700ms ease-out both;
+}
+@keyframes flash {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Insígnia salta da Pokébola girando */
+.badge-pop {
+  animation: badgePop 1100ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+@keyframes badgePop {
+  0% { transform: scale(0) rotateY(0); opacity: 0; }
+  40% { opacity: 1; }
+  70% { transform: scale(1.18) rotateY(540deg); }
+  100% { transform: scale(1) rotateY(720deg); }
+}
+.badge-float {
+  animation: badgeFloat 3.2s ease-in-out infinite;
+}
+@keyframes badgeFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.badge-spin {
+  animation: badgeSpin 900ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+@keyframes badgeSpin {
+  from { transform: perspective(600px) rotateY(-360deg) scale(0.6); }
+  to { transform: perspective(600px) rotateY(0) scale(1); }
+}
+
+/* Confete e estrelinhas: cada partícula recebe --dx, --dy e --r */
+.confetti {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  animation: confetti var(--t, 1.4s) cubic-bezier(0.15, 0.7, 0.3, 1) var(--d, 0s) both;
+}
+@keyframes confetti {
+  0% { transform: translate(-50%, -50%) scale(0.4) rotate(0); opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) rotate(var(--r)); opacity: 0; }
+}
+
+/* Texto da caixa de diálogo dos jogos */
+.dialog-arrow {
+  animation: dialogArrow 700ms steps(2) infinite;
+}
+@keyframes dialogArrow {
+  50% { transform: translateY(3px); }
+}
+.pop-in {
+  animation: popIn 380ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+@keyframes popIn {
+  from { transform: translateY(16px) scale(0.92); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+.pop-out {
+  animation: popOut 260ms ease-in both;
+}
+@keyframes popOut {
+  to { transform: translateY(16px) scale(0.95); opacity: 0; }
+}
+
+/* Barra de XP com brilho correndo */
+.xp-fill {
+  position: relative;
+  overflow: hidden;
+  transition: width 1200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.xp-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 0.55) 50%, transparent 80%);
+  transform: translateX(-100%);
+  animation: xpShimmer 2.6s ease-in-out infinite;
+}
+@keyframes xpShimmer {
+  60%, 100% { transform: translateX(100%); }
+}
+
+/* Pokébola gigante decorando os cabeçalhos */
+.pokeball-deco {
+  animation: spin 60s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .burst-rays,
+  .pokeball-deco,
+  .badge-shine,
+  .xp-fill::after {
+    animation: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .boot-sweep {
     display: none;
