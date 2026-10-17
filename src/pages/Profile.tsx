@@ -14,6 +14,7 @@ import { Button } from '../components/ui/Button'
 import { StatTile } from '../components/ui/StatTile'
 import { BadgeCase } from '../components/gamification/BadgeCase'
 import { PublicProfileSettings } from '../components/social/PublicProfileSettings'
+import { NotificationSettings } from '../components/profile/NotificationSettings'
 import { PokeballDeco, XpBar } from '../components/gamification/TrainerCard'
 import { Avatar } from '../components/profile/Avatar'
 import { ProfileEditor } from '../components/profile/ProfileEditor'
@@ -129,6 +130,8 @@ export function Profile() {
       <BadgeCase badges={badges} />
 
       <PublicProfileSettings />
+
+      <NotificationSettings />
 
       <section className="panel overflow-hidden" aria-labelledby="showcases-title">
         <div className="flex flex-wrap items-center justify-between gap-3 p-5 pb-0">

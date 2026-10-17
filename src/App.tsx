@@ -20,6 +20,14 @@ import { TrainerProfile } from './pages/TrainerProfile'
 import { PublicShell } from './components/layout/PublicShell'
 import { useSocial } from './store/social'
 import { useMascot } from './store/mascot'
+import { usePush } from './store/push'
+
+// Toque numa notificação com o app aberto: o service worker pede para ir à tela certa.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', (e) => {
+    if (e.data?.type === 'navigate' && typeof e.data.url === 'string') window.location.href = e.data.url
+  })
+}
 
 const PAGES = {
   inicio: Dashboard,
@@ -66,6 +74,7 @@ function App() {
     useShowcases.getState().load(userId)
     useSocial.getState().load(userId)
     useMascot.getState().load(userId)
+    void usePush.getState().load(userId)
   }, [authReady, userId])
 
   useEffect(() => {

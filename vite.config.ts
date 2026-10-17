@@ -32,6 +32,9 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         globIgnores: ['**/opencv-*.js', 'card-index/**', 'intro/**'],
         navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api\//],
+        // Recebe e mostra as notificações push (public/push-sw.js).
+        importScripts: ['/push-sw.js'],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.hostname === 'assets.tcgdex.net',

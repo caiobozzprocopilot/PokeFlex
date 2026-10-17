@@ -43,6 +43,14 @@ src/
 - Variáveis em `.env.local` (veja `.env.example`). Sem elas o app roda em modo demonstração (login e coleção no navegador).
 - Mudanças no banco: novo arquivo em `supabase/migrations/` e rodar no SQL Editor do projeto.
 
+## Servidor (Vercel)
+
+- `api/` são funções da Vercel; `server/` é o código comum delas (Supabase com chave secreta, envio de push).
+- Agendamentos em `vercel.json`: lembrete do streak às 23h UTC (20h de Brasília) e preço-alvo às 12h UTC.
+- Variáveis só da Vercel (nunca no git): `SUPABASE_SECRET_KEY`, `VAPID_PRIVATE_KEY`, `CRON_SECRET`. Cópias locais em `.env.local`.
+- A chave pública VAPID está no código (`src/services/push.ts` e `server/push.js`); se trocar o par, troque nos dois.
+- Para testar push localmente: `vite build` + `vite preview` (o service worker não roda no `npm run dev`).
+
 ## Novidades (obrigatório a cada commit com mudança visível)
 
 A tela "Novidades" (`src/pages/Updates.tsx`) é atualizada junto com cada commit que muda algo que o usuário vê:

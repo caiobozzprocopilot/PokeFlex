@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Check, Flame, Snowflake, Sparkles, Trophy } from 'lucide-react'
+import { Bell, Check, Flame, Snowflake, Sparkles, Trophy } from 'lucide-react'
 import { useMascot } from '../../store/mascot'
+import { useAuth } from '../../store/auth'
+import { usePush } from '../../store/push'
+import { useUi } from '../../store/ui'
 import { activeToday, DAILY_BONUS_XP, displayState, hourSP, MAX_CRYSTALS, MISSIONS, stageOf, type MissionDef } from '../../utils/mascot'
 import { Fagulin } from './Fagulin'
 
@@ -42,6 +45,41 @@ function MissionRow({ mission, progress, done }: { mission: MissionDef; progress
 }
 
 const hoursLeft = () => Math.max(1, 24 - hourSP())
+
+// Convite para ligar o lembrete das 20h, só para quem ainda não ativou e pode ativar neste aparelho.
+function ReminderPrompt() {
+  const user = useAuth((s) => s.user)
+  const { support, permission, subscribed, loaded, enable } = usePush()
+  const go = useUi((s) => s.go)
+  const [state, setState] = useState<'idle' | 'busy' | 'done' | 'error'>('idle')
+  if (!user || !loaded || subscribed || permission === 'denied' || support === 'unsupported') return null
+
+  if (support === 'ios-install') {
+    return (
+      <button onClick={() => go('perfil')} className="flex items-center gap-2 text-xs text-muted hover:text-primary">
+        <Bell size={14} aria-hidden /> Instale o app para o Fagulin te lembrar às 20h
+      </button>
+    )
+  }
+  return (
+    <button
+      disabled={state === 'busy'}
+      onClick={async () => {
+        setState('busy')
+        try {
+          await enable(user.id)
+          setState('done')
+        } catch {
+          setState('error')
+        }
+      }}
+      className="flex items-center gap-2 rounded-xl border border-dashed border-primary/40 px-3 py-2 text-sm text-primary transition-colors hover:bg-primary/10"
+    >
+      <Bell size={15} aria-hidden />
+      {state === 'busy' ? 'Ativando…' : state === 'error' ? 'Não deu para ativar. Veja em Perfil → Notificações' : 'Me lembre às 20h se eu esquecer'}
+    </button>
+  )
+}
 
 export function MascotCard() {
   const status = useMascot((s) => s.status)
@@ -119,6 +157,7 @@ export function MascotCard() {
           </div>
 
           <p className={`rounded-xl px-4 py-2.5 text-sm ${message.tone}`}>{message.text}</p>
+          <ReminderPrompt />
 
           {next ? (
             <div>

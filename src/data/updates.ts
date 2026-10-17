@@ -23,6 +23,21 @@ export type Release = {
 
 export const RELEASES: Release[] = [
   {
+    version: '0.13',
+    date: '2026-10-17',
+    title: 'Notificações no celular',
+    intro: 'O Fagulin agora te chama quando precisa, mesmo com o PokeFlex fechado.',
+    items: [
+      {
+        title: 'Lembrete do streak, trocas e preço-alvo',
+        body: 'Ative em Perfil → Notificações (ou no card do Fagulin). Às 20h, se você ainda não cuidou do Fagulin no dia, ele avisa. Também chegam avisos de proposta de troca e de carta desejada que bateu o preço-alvo.',
+        image: '/updates/notificacoes.webp',
+        tip: 'Escolha o que quer receber em cada chave e use "Enviar teste" para ver como chega. No iPhone, instale o PokeFlex na tela de início antes de ativar.',
+        action: { label: 'Ativar notificações', page: 'perfil' },
+      },
+    ],
+  },
+  {
     version: '0.12',
     date: '2026-10-17',
     title: 'Ofertas na LigaPokemon',

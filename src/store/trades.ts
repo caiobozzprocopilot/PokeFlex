@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { fetchTrades, respondTrade, type Trade, type TradeAction } from '../services/trades'
 import { useMascot } from './mascot'
+import { notifyTrade } from '../services/push'
 
 type TradesState = {
   items: Trade[]
@@ -25,6 +26,7 @@ export const useTrades = create<TradesState>()((set, get) => ({
 
   act: async (id, action) => {
     await respondTrade(id, action)
+    if (action !== 'applied') notifyTrade(id)
     if (action !== 'applied') useMascot.getState().event(action === 'complete' ? 'trade' : 'trade_reply')
     await get().load()
   },
